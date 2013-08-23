@@ -82,6 +82,7 @@ int main(int argc, char * argv[]) {
 
 		switch(opcode) {
 			case 10:
+				printf("> ");
 				if(!scanf("%d", &(memory[argument]))) {
 					fprintf(stderr, "Error: Input not a number");
 					free(memory);
