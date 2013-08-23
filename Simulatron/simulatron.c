@@ -84,7 +84,7 @@ int main(int argc, char * argv[]) {
 			case 10:
 				printf("> ");
 				if(!scanf("%d", &(memory[argument]))) {
-					fprintf(stderr, "Error: Input not a number");
+					fprintf(stderr, "Error: Input not a number\n");
 					free(memory);
 					return 6;
 				}
@@ -106,7 +106,7 @@ int main(int argc, char * argv[]) {
 				break;
 			case 32:
 				if(memory[argument] == 0) {
-					fprintf(stderr, "Error: Division by zero at %d\n", instruction);
+					fprintf(stderr, "Error: Division by zero at %d\n", instruction - 1);
 					free(memory);
 					return 4;
 				}
@@ -132,7 +132,7 @@ int main(int argc, char * argv[]) {
 			case 50:
 				break;
 			default:
-				fprintf(stderr, "Error: Unknown opcode %d at %d\n", opcode, instruction);
+				fprintf(stderr, "Error: Unknown opcode %d at %d\n", opcode, instruction - 1);
 				free(memory);
 				return 4;
 		}
