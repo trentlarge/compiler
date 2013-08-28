@@ -129,8 +129,8 @@ int main(int argc, char * argv[]) {
 			}
 		}
 
-		short opcode = memory[instruction] / mem_width;
-		short argument = memory[instruction] % mem_width;
+		int opcode = memory[instruction] / mem_width;
+		int argument = memory[instruction] % mem_width;
 
 		if(argument < 0 || argument >= mem_length) {
 			fprintf(stderr, "Error: Invalid argument %d at %d\n", argument, instruction);
