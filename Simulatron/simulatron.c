@@ -30,9 +30,12 @@ int main(int argc, char * argv[]) {
 	char option[20];
 	int result = fscanf(program, "#%20s\n", option);
 	while(result) {
-		sscanf(option, "memory %hd", &mem_length);
-		if(!warnings)
-			sscanf(option, "warnings %1hd", &warnings);
+		if(sscanf(option, "memory %hd", &mem_length) == 1);
+		else if(!warnings && sscanf(option, "warnings %1hd", &warnings) == 1);
+		else {
+			fprintf(stderr, "Invalid pragma found: %s", option);
+			return 5;
+		}
 
 		result = fscanf(program, "#%20s\n", option);
 	}
