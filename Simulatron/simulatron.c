@@ -51,7 +51,9 @@ int main(int argc, char * argv[]) {
 	int * memory = calloc(mem_length, sizeof(int));
 
 	short i = 0;
-	do {
+	int buffer;
+	result = fscanf(program, "%d", &buffer);
+	while(result > 0 && result != EOF) {
 		if(i >= mem_length) {
 			fprintf(stderr, "Error: Not enough memory to load program\n");
 			free(memory);
@@ -59,10 +61,11 @@ int main(int argc, char * argv[]) {
 			return 3;
 		}
 
-		result = fscanf(program, "%d", &(memory[i]));
+		memory[i] = buffer;
+
+		result = fscanf(program, "%d", &buffer);
 		i++;
 	}
-	while(result > 0 && result != EOF);
 
 	fclose(program);
 
@@ -75,7 +78,7 @@ int main(int argc, char * argv[]) {
 			char args[10];
 
 			printf("(dbg) ");
-			short num_args = scanf("%1s %10s", &command, args);
+			short num_args = scanf("%1s %10s\n", &command, args);
 			if(num_args == 0)
 				continue;
 
@@ -125,12 +128,15 @@ int main(int argc, char * argv[]) {
 					fprintf(stderr, "Error: Hit end of memory space\n");
 					if(debug) {
 						error = 5;
-						continue;
+						break;
 					}
 					free(memory);
 					return 5;
 				}
 			}
+
+			if(error != -1)
+				continue;
 		}
 
 		int opcode = memory[instruction] / mem_width;
@@ -244,8 +250,8 @@ void print(short instruction, int accumulator, int * memory, short mem_length) {
 
 	int number_width = ceil(log10(mem_length));
 	fprintf(stderr, "Memory:\n");
-	for(int i = 0; i < mem_length; i++) {
-		fprintf(stderr, "%*d |", i, number_width);
+	for(int i = 0; i < mem_length;) {
+		fprintf(stderr, "%*d |", number_width, i);
 		for(int ii = 0; ii < 10; ii++, i++)
 			fprintf(stderr, " %d", memory[i]);
 		fprintf(stderr, "\n");
