@@ -75,7 +75,7 @@ int main(int argc, char * argv[]) {
 
 	if(debug) {
 		debug_prompt = 1;
-		if(signal(SIGINT, sigint) == SIG_ERR);
+		signal(SIGINT, sigint);
 	}
 
 	short error = -1;
@@ -292,6 +292,7 @@ void print(short instruction, int accumulator, int * memory, short mem_length) {
 }
 
 void sigint(int sig) {
+	signal(SIGINT, sigint);
 	debug_prompt = 1;
 	printf("\n");
 }
