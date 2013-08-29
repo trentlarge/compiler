@@ -1,9 +1,13 @@
 #include <math.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+short debug_prompt = 0;
+
 void print(short instruction, int accumulator, int * memory, short mem_length);
+void sigint(int sig);
 
 int main(int argc, char * argv[]) {
 	if(argc < 2 || argc > 3 || (argc == 3 && strcmp(argv[1], "-d"))) {
@@ -69,10 +73,17 @@ int main(int argc, char * argv[]) {
 
 	fclose(program);
 
+	if(debug) {
+		debug_prompt = 1;
+		if(signal(SIGINT, sigint) == SIG_ERR);
+	}
+
 	short error = -1;
-	short debug_prompt = debug;
 	short breakpoint = -1;
 	while(1) {
+		if(debug && instruction == breakpoint)
+			printf("Hit breakpoint at %hd\n", breakpoint);
+
 		while(debug && (debug_prompt || error != -1 || instruction == breakpoint)) {
 			char command[12];
 
@@ -81,23 +92,70 @@ int main(int argc, char * argv[]) {
 				continue;
 
 			if(command[0] == 'r') {
+				if(error == 0)
+					error = -1;
+				instruction = 0;
 				debug_prompt = 0;
 				break;
 			}
-			else if(command[0] == 'p')
-				print(instruction, accumulator, memory, mem_length);
+			else if(command[0] == 'c') {
+				debug_prompt = 0;
+				break;
+			}
+			else if(command[0] == 'p') {
+				short n;
+				if(sscanf(command, "%*s %hd", &n) == 1) {
+					if(n >= 0 && n < mem_length)
+						printf("%hd\n", memory[n]);
+					else
+						printf("Error: n out of range\n");
+				}
+				else {
+					print(instruction, accumulator, memory, mem_length);
+				}
+			}
+			else if(command[0] == 'w') {
+				short n;
+				int val;
+				if(sscanf(command, "%*s %hd %d", &n, &val) == 2) {
+					if(n >= 0 && n < mem_length)
+						memory[n] = val;
+					else
+						printf("Error: n out of range\n");
+				}
+				else {
+					printf("Usage: w <n> <val>\n");
+				}
+			}
 			else if(command[0] == 's')
 				break;
 			else if(command[0] == 'b') {
-				if(!sscanf(command, "%*s %hd", &breakpoint))
-					printf("Usage: b <instruction>\n");
+				short n;
+				if(sscanf(command, "%*s %hd", &n) == 1) {
+					if(n >= 0 && n < mem_length)
+						breakpoint = n;
+					else
+						printf("Error: n out of range\n");
+				}
+				else {
+					breakpoint = -1;
+					printf("Breakpoint cleared\n");
+				}
 			}
 			else if(command[0] == 'q') {
 				free(memory);
 				return 0;
 			}
-			else if(command[0] == 'h')
-				printf("r\t- Run program from beginning or continue from current position.\np\t- Print the instruction pointer, instruction register, accumulator, and memory\ns\t- Step one instruction\nb <n>\t- Set a breakpoint at memory space n\nq\t- Quit\nh\t- Display this help\n");
+			else if(command[0] == 'h') {
+				printf("r		Run program from beginning\n");
+				printf("c		Continue from current position\n");
+				printf("p [n]		Print the instruction pointer, instruction register, accumulator, and memory or, if specified, print the memory space n\n");
+				printf("w <n> <val>	Write val to memory space n\n");
+				printf("s		Step one instruction\n");
+				printf("b [n]		Set a breakpoint at memory space n or if n is not specified, clear the breakpoint\n");
+				printf("q		Quit\n");
+				printf("h		Display this help\n");
+			}
 			else
 				printf("Unknown command\n");
 		}
@@ -229,4 +287,9 @@ void print(short instruction, int accumulator, int * memory, short mem_length) {
 			fprintf(stderr, " %*d", mem_width, memory[i]);
 		fprintf(stderr, "\n");
 	}
+}
+
+void sigint(int sig) {
+	debug_prompt = 1;
+	printf("\n");
 }
