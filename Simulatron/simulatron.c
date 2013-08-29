@@ -29,11 +29,11 @@ int main(int argc, char * argv[]) {
 
 	char option[20];
 	int result = fscanf(program, "#%20s\n", option);
-	while(result) {
+	while(result > 0 && result != EOF) {
 		if(sscanf(option, "memory %hd", &mem_length) == 1);
 		else if(!warnings && sscanf(option, "warnings %1hd", &warnings) == 1);
 		else {
-			fprintf(stderr, "Invalid pragma: %s", option);
+			fprintf(stderr, "Invalid pragma: %s\n", option);
 			return 5;
 		}
 
