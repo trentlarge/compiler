@@ -73,7 +73,7 @@ int main(int argc, char * argv[]) {
 	short debug_prompt = debug;
 	short breakpoint = -1;
 	while(1) {
-		while(debug_prompt || error != -1 || instruction == breakpoint) {
+		while(debug && (debug_prompt || error != -1 || instruction == breakpoint)) {
 			char command[12];
 
 			printf("(dbg) ");
@@ -109,12 +109,8 @@ int main(int argc, char * argv[]) {
 
 		if(instruction >= mem_length) {
 			fprintf(stderr, "Error: Hit end of memory space\n");
-			if(debug) {
-				error = 5;
-				continue;
-			}
-			free(memory);
-			return 5;
+			error = 5;
+			continue;
 		}
 
 		if(memory[instruction] == 0) {
@@ -124,12 +120,8 @@ int main(int argc, char * argv[]) {
 				instruction++;
 				if(instruction >= mem_length) {
 					fprintf(stderr, "Error: Hit end of memory space\n");
-					if(debug) {
-						error = 5;
-						break;
-					}
-					free(memory);
-					return 5;
+					error = 5;
+					break;
 				}
 			}
 
@@ -142,12 +134,8 @@ int main(int argc, char * argv[]) {
 
 		if(argument < 0 || argument >= mem_length) {
 			fprintf(stderr, "Error: Invalid argument %d at %d\n", argument, instruction);
-			if(debug) {
-				error = 4;
-				continue;
-			}
-			free(memory);
-			return 4;
+			error = 4;
+			continue;
 		}
 
 		switch(opcode) {
@@ -156,12 +144,8 @@ int main(int argc, char * argv[]) {
 				char line[20];
 				if(fgets(line, 20, stdin) == NULL || !sscanf(line, "%d", &(memory[argument]))) {
 					fprintf(stderr, "Error: Input not a number\n");
-					if(debug) {
-						error = 6;
-						continue;
-					}
-					free(memory);
-					return 6;
+					error = 6;
+					continue;
 				}
 				break;
 			case 11:
@@ -188,12 +172,8 @@ int main(int argc, char * argv[]) {
 			case 32:
 				if(memory[argument] == 0) {
 					fprintf(stderr, "Error: Division by zero at %d\n", instruction);
-					if(debug) {
-						error = 4;
-						continue;
-					}
-					free(memory);
-					return 4;
+					error = 4;
+					continue;
 				}
 				accumulator /= memory[argument];
 				if(warnings && (accumulator >= val_width || accumulator <= -val_width))
@@ -220,21 +200,14 @@ int main(int argc, char * argv[]) {
 				}
 				break;
 			case 43:
-				if(debug) {
-					error = 0;
-					continue;
-				}
-				return 0;
+				error = 0;
+				continue;
 			case 50:
 				break;
 			default:
 				fprintf(stderr, "Error: Unknown opcode %d at %d\n", opcode, instruction);
-				if(debug) {
-					error = 4;
-					continue;
-				}
-				free(memory);
-				return 4;
+				error = 4;
+				continue;
 		}
 
 		instruction++;
