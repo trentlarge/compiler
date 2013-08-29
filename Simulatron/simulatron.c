@@ -127,8 +127,10 @@ int main(int argc, char * argv[]) {
 					printf("Usage: w <n> <val>\n");
 				}
 			}
-			else if(command[0] == 's')
+			else if(command[0] == 's') {
+				debug_prompt = 1;
 				break;
+			}
 			else if(command[0] == 'b') {
 				short n;
 				if(sscanf(command, "%*s %hd", &n) == 1) {
@@ -148,7 +150,7 @@ int main(int argc, char * argv[]) {
 			}
 			else if(command[0] == 'h') {
 				printf("r		Run program from beginning\n");
-				printf("c		Continue from current position\n");
+				printf("c		Continue program from current position\n");
 				printf("p [n]		Print the instruction pointer, instruction register, accumulator, and memory or, if specified, print the memory space n\n");
 				printf("w <n> <val>	Write val to memory space n\n");
 				printf("s		Step one instruction\n");
