@@ -6,13 +6,13 @@
 void print(short instruction, int accumulator, int * memory, short mem_length);
 
 int main(int argc, char * argv[]) {
-	if(argc < 2 || argc > 3) {
+	if(argc < 2 || argc > 3 || (argc == 3 && strcmp(argv[1], "-d") != 0)) {
 		fprintf(stderr, "Usage: %s [-d] <filename>\n", argv[0]);
 		return 1;
 	}
 
 	short debug;
-	if(argc == 3 && strcmp(argv[2], "-d") == 0)
+	if(argc == 3)
 		debug = 1;
 	else
 		debug = 0;
@@ -33,7 +33,7 @@ int main(int argc, char * argv[]) {
 		if(sscanf(option, "memory %hd", &mem_length) == 1);
 		else if(!warnings && sscanf(option, "warnings %1hd", &warnings) == 1);
 		else {
-			fprintf(stderr, "Invalid pragma found: %s", option);
+			fprintf(stderr, "Invalid pragma: %s", option);
 			return 5;
 		}
 
@@ -66,15 +66,15 @@ int main(int argc, char * argv[]) {
 
 	fclose(program);
 
-	short error = 0;
+	short error = -1;
 	short debug_prompt = debug;
 	short breakpoint = -1;
 	while(1) {
-		while(debug_prompt || error || instruction == breakpoint) {
+		while(debug_prompt || error != -1 || instruction == breakpoint) {
 			char command;
 			char args[10];
 
-			printf("(dgb) ");
+			printf("(dbg) ");
 			short num_args = scanf("%1s %10s", &command, args);
 			if(num_args == 0)
 				continue;
@@ -91,15 +91,17 @@ int main(int argc, char * argv[]) {
 				if(!sscanf(args, "%hd", &breakpoint))
 					printf("Usage: b <instruction>\n");
 			}
-			else if(command == 'q')
+			else if(command == 'q') {
+				free(memory);
 				return 0;
+			}
 			else if(command == 'h')
-				printf("r - Run program from beginning or continue from current position.\np - Print the instruction pointer, instruction register, accumulator, and memory\ns - Step one instruction\nb - Set a breakpoint\nq - Quit\nh - Display this help\n");
+				printf("r - Run program from beginning or continue from current position.\np - Print the instruction pointer, instruction register, accumulator, and memory\ns - Step one instruction\nb <n> - Set a breakpoint at memory space n\nq - Quit\nh - Display this help\n");
 			else
-				printf("Unknown command");
+				printf("Unknown command\n");
 		}
 
-		if(error) {
+		if(error != -1) {
 			free(memory);
 			return error;
 		}
@@ -201,15 +203,22 @@ int main(int argc, char * argv[]) {
 				instruction = argument;
 				continue;
 			case 41:
-				if(accumulator < 0)
+				if(accumulator < 0) {
 					instruction = argument;
+					continue;
+				}
 				break;
 			case 42:
-				if(accumulator == 0)
+				if(accumulator == 0) {
 					instruction = argument;
+					continue;
+				}
 				break;
 			case 43:
-				free(memory);
+				if(debug) {
+					error = 0;
+					continue;
+				}
 				return 0;
 			case 50:
 				break;
