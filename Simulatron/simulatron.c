@@ -79,8 +79,10 @@ int main(int argc, char * argv[]) {
 			if(num_args == 0)
 				continue;
 
-			if(command == 'r')
+			if(command == 'r') {
 				debug_prompt = 0;
+				break;
+			}
 			else if(command == 'p')
 				print(instruction, accumulator, memory, mem_length);
 			else if(command == 's')
