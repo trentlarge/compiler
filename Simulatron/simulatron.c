@@ -6,7 +6,7 @@
 void print(short instruction, int accumulator, int * memory, short mem_length);
 
 int main(int argc, char * argv[]) {
-	if(argc < 2 || argc > 3 || (argc == 3 && strcmp(argv[1], "-d") != 0)) {
+	if(argc < 2 || argc > 3 || (argc == 3 && strcmp(argv[1], "-d"))) {
 		fprintf(stderr, "Usage: %s [-d] <filename>\n", argv[0]);
 		return 1;
 	}
@@ -28,7 +28,7 @@ int main(int argc, char * argv[]) {
 	int accumulator = 0;
 
 	char option[20];
-	int result = fscanf(program, "#%20s\n", option);
+	int result = fscanf(program, "#%[^\n]\n", option);
 	while(result > 0 && result != EOF) {
 		if(sscanf(option, "memory %hd", &mem_length) == 1);
 		else if(!warnings && sscanf(option, "warnings %1hd", &warnings) == 1);
@@ -46,7 +46,7 @@ int main(int argc, char * argv[]) {
 	}
 
 	mem_width = pow(10, ceil(log10(mem_length)));
-	val_width = mem_width * mem_width;
+	val_width = 100 * mem_width;
 
 	int * memory = calloc(mem_length, sizeof(int));
 
@@ -74,32 +74,30 @@ int main(int argc, char * argv[]) {
 	short breakpoint = -1;
 	while(1) {
 		while(debug_prompt || error != -1 || instruction == breakpoint) {
-			char command;
-			char args[10];
+			char command[12];
 
 			printf("(dbg) ");
-			short num_args = scanf("%1s %10s\n", &command, args);
-			if(num_args == 0)
+			if(fgets(command, 12, stdin) == NULL || command[0] == '\n')
 				continue;
 
-			if(command == 'r') {
+			if(command[0] == 'r') {
 				debug_prompt = 0;
 				break;
 			}
-			else if(command == 'p')
+			else if(command[0] == 'p')
 				print(instruction, accumulator, memory, mem_length);
-			else if(command == 's')
+			else if(command[0] == 's')
 				break;
-			else if(command == 'b') {
-				if(!sscanf(args, "%hd", &breakpoint))
+			else if(command[0] == 'b') {
+				if(!sscanf(command, "%*s %hd", &breakpoint))
 					printf("Usage: b <instruction>\n");
 			}
-			else if(command == 'q') {
+			else if(command[0] == 'q') {
 				free(memory);
 				return 0;
 			}
-			else if(command == 'h')
-				printf("r - Run program from beginning or continue from current position.\np - Print the instruction pointer, instruction register, accumulator, and memory\ns - Step one instruction\nb <n> - Set a breakpoint at memory space n\nq - Quit\nh - Display this help\n");
+			else if(command[0] == 'h')
+				printf("r\t- Run program from beginning or continue from current position.\np\t- Print the instruction pointer, instruction register, accumulator, and memory\ns\t- Step one instruction\nb <n>\t- Set a breakpoint at memory space n\nq\t- Quit\nh\t- Display this help\n");
 			else
 				printf("Unknown command\n");
 		}
@@ -155,7 +153,8 @@ int main(int argc, char * argv[]) {
 		switch(opcode) {
 			case 10:
 				printf("> ");
-				if(!scanf("%d", &(memory[argument]))) {
+				char line[20];
+				if(fgets(line, 20, stdin) == NULL || !sscanf(line, "%d", &(memory[argument]))) {
 					fprintf(stderr, "Error: Input not a number\n");
 					if(debug) {
 						error = 6;
@@ -249,11 +248,12 @@ void print(short instruction, int accumulator, int * memory, short mem_length) {
 	fprintf(stderr, "Accumulator: %d\n", accumulator);
 
 	int number_width = ceil(log10(mem_length));
+	int mem_width = 2 + number_width;
 	fprintf(stderr, "Memory:\n");
 	for(int i = 0; i < mem_length;) {
 		fprintf(stderr, "%*d |", number_width, i);
 		for(int ii = 0; ii < 10; ii++, i++)
-			fprintf(stderr, " %d", memory[i]);
+			fprintf(stderr, " %*d", mem_width, memory[i]);
 		fprintf(stderr, "\n");
 	}
 }
