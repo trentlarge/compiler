@@ -262,8 +262,6 @@ int main(int argc, char * argv[]) {
 			case 43:
 				error = 0;
 				continue;
-			case 50:
-				break;
 			default:
 				fprintf(stderr, "Error: Unknown opcode %d at %d\n", opcode, instruction);
 				error = 4;
