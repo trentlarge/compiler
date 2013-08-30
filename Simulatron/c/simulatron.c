@@ -87,7 +87,7 @@ int main(int argc, char * argv[]) {
 		while(debug && (debug_prompt || error != -1 || instruction == breakpoint)) {
 			char command[12];
 
-			printf("(dbg) ");
+			fprintf(stderr, "(dbg) ");
 			if(fgets(command, 12, stdin) == NULL || command[0] == '\n')
 				continue;
 
@@ -106,9 +106,9 @@ int main(int argc, char * argv[]) {
 				short n;
 				if(sscanf(command, "%*s %hd", &n) == 1) {
 					if(n >= 0 && n < mem_length)
-						printf("%d\n", memory[n]);
+						fprintf(stderr, "%d\n", memory[n]);
 					else
-						printf("Error: n out of range\n");
+						fprintf(stderr, "Error: n out of range\n");
 				}
 				else {
 					print(instruction, accumulator, memory, mem_length);
@@ -121,10 +121,10 @@ int main(int argc, char * argv[]) {
 					if(n >= 0 && n < mem_length)
 						memory[n] = val;
 					else
-						printf("Error: n out of range\n");
+						fprintf(stderr, "Error: n out of range\n");
 				}
 				else {
-					printf("Usage: w <n> <val>\n");
+					fprintf(stderr, "Usage: w <n> <val>\n");
 				}
 			}
 			else if(command[0] == 's') {
@@ -137,11 +137,11 @@ int main(int argc, char * argv[]) {
 					if(n >= 0 && n < mem_length)
 						breakpoint = n;
 					else
-						printf("Error: n out of range\n");
+						fprintf(stderr, "Error: n out of range\n");
 				}
 				else {
 					breakpoint = -1;
-					printf("Breakpoint cleared\n");
+					fprintf(stderr, "Breakpoint cleared\n");
 				}
 			}
 			else if(command[0] == 'q') {
@@ -149,17 +149,17 @@ int main(int argc, char * argv[]) {
 				return 0;
 			}
 			else if(command[0] == 'h') {
-				printf("r		Run program from beginning\n");
-				printf("c		Continue program from current position\n");
-				printf("p [n]		Print the instruction pointer, instruction register, accumulator, and memory or, if specified, print the memory space n\n");
-				printf("w <n> <val>	Write val to memory space n\n");
-				printf("s		Step one instruction\n");
-				printf("b [n]		Set a breakpoint at memory space n or if n is not specified, clear the breakpoint\n");
-				printf("q		Quit\n");
-				printf("h		Display this help\n");
+				fprintf(stderr, "r		Run program from beginning\n");
+				fprintf(stderr, "c		Continue program from current position\n");
+				fprintf(stderr, "p [n]		Print the instruction pointer, instruction register, accumulator, and memory or, if specified, print the memory space n\n");
+				fprintf(stderr, "w <n> <val>	Write val to memory space n\n");
+				fprintf(stderr, "s		Step one instruction\n");
+				fprintf(stderr, "b [n]		Set a breakpoint at memory space n or if n is not specified, clear the breakpoint\n");
+				fprintf(stderr, "q		Quit\n");
+				fprintf(stderr, "h		Display this help\n");
 			}
 			else
-				printf("Unknown command\n");
+				fprintf(stderr, "Unknown command\n");
 		}
 
 		if(error != -1) {
