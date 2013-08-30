@@ -106,7 +106,7 @@ int main(int argc, char * argv[]) {
 				short n;
 				if(sscanf(command, "%*s %hd", &n) == 1) {
 					if(n >= 0 && n < mem_length)
-						printf("%hd\n", memory[n]);
+						printf("%d\n", memory[n]);
 					else
 						printf("Error: n out of range\n");
 				}

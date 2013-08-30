@@ -1,3 +1,5 @@
+CC = clang
+
 all:
 	$(CC) -O2 -std=c99 -Wall -lm -o simulatron simulatron.c
 
