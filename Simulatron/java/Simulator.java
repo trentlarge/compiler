@@ -1,3 +1,4 @@
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Simulator {
@@ -11,7 +12,7 @@ public class Simulator {
 		accumulator = 0;
 	}
 
-	public boolean step() throws OutOfMemoryException, DivisionByZeroException, InvalidOpcodeException, AccumulatorOverflowException {
+	public boolean step() throws OutOfMemoryException, DivisionByZeroException, InvalidOpcodeException, AccumulatorOverflowException, InputMismatchException {
 		if(instruction > 99)
 			throw new OutOfMemoryException();
 
@@ -21,7 +22,10 @@ public class Simulator {
 		switch(opcode) {
 			case 10:
 				System.out.print("> ");
-				memory[argument] = (new Scanner(System.in)).nextByte();
+				int val = (new Scanner(System.in)).nextInt();
+				if(val > 9999 || val < -9999)
+					throw new InputMismatchException();
+				memory[argument] = val;
 				break;
 			case 11:
 				System.out.println(memory[argument]);

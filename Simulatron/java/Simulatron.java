@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
 
@@ -194,6 +195,10 @@ public class Simulatron {
 			}
 			catch(AccumulatorOverflowException e) {
 				System.err.println("Error: Accumulator overflow at " + simulator.getInstruction());
+				error = true;
+			}
+			catch(InputMismatchException e) {
+				System.err.println("Error: Input not a number");
 				error = true;
 			}
 		}
