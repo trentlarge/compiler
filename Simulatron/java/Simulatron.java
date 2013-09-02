@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 public class Simulatron {
 	public static void main(String[] args) {
@@ -22,7 +23,8 @@ public class Simulatron {
 			return;
 		}
 
-		boolean debug = false;
+		boolean debug = JOptionPane.showConfirmDialog(null, "Would you like to enable debugging?", "Simulatron", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+		boolean debug_prompt = debug;
 
 		int[] memory = new int[100];
 		int i = 0;
@@ -49,7 +51,6 @@ public class Simulatron {
 
 		Simulator simulator = new Simulator(memory);
 
-		boolean debug_prompt = debug;
 		boolean error = false;
 		int breakpoint = -1;
 		boolean run = true;
@@ -67,29 +68,26 @@ public class Simulatron {
 					System.err.print("(dbg) ");
 					//Grab the command each argument
 					Scanner stdin = new Scanner(System.in);
-					String command = stdin.next();
-					ArrayList<String> arguments = new ArrayList<String>();
-					while(stdin.hasNext())
-						arguments.add(stdin.next());
+					String[] command = stdin.nextLine().split(" ");
 
 					//Restart from beginning
-					if(command.equalsIgnoreCase("r") || command.equalsIgnoreCase("run")) {
+					if(command[0].equalsIgnoreCase("r") || command[0].equalsIgnoreCase("run")) {
 						error = false;
 						debug_prompt = false;
 						simulator.setInstruction(0);
 						break;
 					}
 					//Just turn off prompt and break out of debug loop
-					else if(command.equalsIgnoreCase("c") || command.equalsIgnoreCase("continue")) {
+					else if(command[0].equalsIgnoreCase("c") || command[0].equalsIgnoreCase("continue")) {
 						debug_prompt = false;
 						break;
 					}
-					else if(command.equalsIgnoreCase("p") || command.equalsIgnoreCase("print")) {
+					else if(command[0].equalsIgnoreCase("p") || command[0].equalsIgnoreCase("print")) {
 						try {
-							if(arguments.size() > 1)
+							if(command.length > 2)
 								throw new Exception();
-							if(arguments.size() == 1) {
-								int n = Integer.parseInt(arguments.get(0));
+							if(command.length == 2) {
+								int n = Integer.parseInt(command[1]);
 								if(n > 99 || n < 0) {
 									System.err.println("Error: n out of range");
 									continue;
@@ -105,16 +103,16 @@ public class Simulatron {
 							System.err.println("Usage: p(rint) [n]");
 						}
 					}
-					else if(command.equalsIgnoreCase("w") || command.equalsIgnoreCase("write")) {
+					else if(command[0].equalsIgnoreCase("w") || command[0].equalsIgnoreCase("write")) {
 						try {
-							if(arguments.size() > 2)
+							if(command.length > 3)
 								throw new Exception();
-							int n = Integer.parseInt(arguments.get(0));
+							int n = Integer.parseInt(command[1]);
 							if(n > 99 || n < 0) {
 								System.err.println("Error: n out of range");
 								continue;
 							}
-							int val = Integer.parseInt(arguments.get(1));
+							int val = Integer.parseInt(command[2]);
 							if(val > 9999 || val < -9999) {
 								System.err.println("Error: val out of range");
 								continue;
@@ -125,16 +123,16 @@ public class Simulatron {
 							System.err.println("Usage: w(rite) <n> <val>");
 						}
 					}
-					else if(command.equalsIgnoreCase("s") || command.equalsIgnoreCase("step")) {
+					else if(command[0].equalsIgnoreCase("s") || command[0].equalsIgnoreCase("step")) {
 						debug_prompt = true;
 						break;
 					}
-					else if(command.equalsIgnoreCase("b") || command.equalsIgnoreCase("break")) {
+					else if(command[0].equalsIgnoreCase("b") || command[0].equalsIgnoreCase("break")) {
 						try {
-							if(arguments.size() > 1)
+							if(command.length > 2)
 								throw new Exception();
-							if(arguments.size() == 1) {
-								int n = Integer.parseInt(arguments.get(0));
+							if(command.length == 2) {
+								int n = Integer.parseInt(command[1]);
 								if(n > 99 || n < 0) {
 									System.err.println("Error: n out of range");
 									continue;
@@ -150,10 +148,10 @@ public class Simulatron {
 							System.err.println("Usage: b(reak) [n]");
 						}
 					}
-					else if(command.equalsIgnoreCase("q") || command.equalsIgnoreCase("quit")) {
+					else if(command[0].equalsIgnoreCase("q") || command[0].equalsIgnoreCase("quit")) {
 						return;
 					}
-					else if(command.equalsIgnoreCase("h") || command.equalsIgnoreCase("help")) {
+					else if(command[0].equalsIgnoreCase("h") || command[0].equalsIgnoreCase("help")) {
 						System.err.println("r(un)		Run program from beginning");
 						System.err.println("c(ontinue)		Continue program from current position");
 						System.err.println("p(rint) [n]		Print the instruction pointer, instruction register, accumulator, and memory or, if specified, print the memory space n");
