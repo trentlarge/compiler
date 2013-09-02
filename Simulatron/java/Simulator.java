@@ -1,23 +1,22 @@
-public class Simulator {
-	private short[100] memory;
-	private byte instruction;
-	private short accumulator;
+import java.util.Scanner;
 
-	public Simulator(short[] memory) {
+public class Simulator {
+	private int[] memory;
+	private int instruction;
+	private int accumulator;
+
+	public Simulator(int[] memory) {
 		this.memory = memory;
 		instruction = 0;
 		accumulator = 0;
 	}
 
-	public void load(InputStream stream) {
-	}
-
-	public boolean step() {
+	public boolean step() throws OutOfMemoryException, DivisionByZeroException, InvalidOpcodeException, AccumulatorOverflowException {
 		if(instruction > 99)
 			throw new OutOfMemoryException();
 
-		byte opcode = memory[instruction] / 100;
-		byte argument = memory[instruction] % 100;
+		int opcode = memory[instruction] / 100;
+		int argument = memory[instruction] % 100;
 
 		switch(opcode) {
 			case 10:
@@ -40,12 +39,12 @@ public class Simulator {
 				accumulator -= memory[argument];
 				break;
 			case 32:
-				accumulator *= memory[argument];
-				break;
-			case 33:
 				if(memory[argument] == 0)
 					throw new DivisionByZeroException();
 				accumulator /= memory[argument];
+				break;
+			case 33:
+				accumulator *= memory[argument];
 				break;
 			case 40:
 				instruction = argument;
@@ -83,7 +82,7 @@ public class Simulator {
 		System.err.println("Accumulator: " + accumulator);
 
 		System.err.println("Memory:");
-		for(int i = 0; i < 100; i) {
+		for(int i = 0; i < 100; i += 0) { //i += 0 because Java does it's expressions weirdly
 			System.err.printf("%2d |", i);
 			for(int ii = 0; ii < 10; ii++, i++) {
 				System.err.printf(" %4d", memory[i]);
@@ -92,15 +91,23 @@ public class Simulator {
 		}
 	}
 
-	public void print(byte n) {
+	public void print(int n) {
 		System.err.println(memory[n]);
 	}
 
-	public void set(byte n, short val) {
+	public void set(int n, int val) {
 		memory[n] = val;
 	}
 
-	public byte getInstruction() {
+	public int get(int n) {
+		return memory[n];
+	}
+
+	public int getInstruction() {
 		return instruction;
+	}
+
+	public void setInstruction(int instruction) {
+		this.instruction = instruction;
 	}
 }

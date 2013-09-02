@@ -92,8 +92,7 @@ int main(int argc, char * argv[]) {
 				continue;
 
 			if(command[0] == 'r') {
-				if(error == 0)
-					error = -1;
+				error = -1;
 				instruction = 0;
 				debug_prompt = 0;
 				break;
