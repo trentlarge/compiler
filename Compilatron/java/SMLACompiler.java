@@ -18,7 +18,7 @@ public class SMLACompiler {
 	private int commandPointer = 0;
 	private int memoryPointer = 99;
 	private String machineCodeContents;
-	
+
 	public SMLACompiler() {
 		symbolTable = new HashMap<Symbol, Integer>();
 		machineCodeContents = "";
@@ -26,7 +26,7 @@ public class SMLACompiler {
 		commandTable.put(usableCommands[2], 11);
 		commandTable.put(usableCommands[6], 43);
 	}
-	
+
 	public void compileFile(File file) throws IOException {
 		Scanner reader = new Scanner(file);
 		String[][] lines = new String[99][];
@@ -45,13 +45,13 @@ public class SMLACompiler {
 			}
 			command = lineComponents[1];
 			if(command.equals(usableCommands[0]) 
-			   || command.equals(usableCommands[1]) 
-			   || command.equals(usableCommands[2]) 
-			   //|| command.equals(usableCommands[3]) 
-			   //|| command.equals(usableCommands[4]) 
-			   //|| command.equals(usableCommands[5]) 
-			   || command.equals(usableCommands[6])
-			   ) {
+					|| command.equals(usableCommands[1]) 
+					|| command.equals(usableCommands[2]) 
+					//|| command.equals(usableCommands[3]) 
+					//|| command.equals(usableCommands[4]) 
+					//|| command.equals(usableCommands[5]) 
+					|| command.equals(usableCommands[6])
+			  ) {
 				int ii = 2;
 				if(ii < lineComponents.length) {
 					parameter += lineComponents[ii] + " ";
@@ -64,14 +64,14 @@ public class SMLACompiler {
 			lines[linePlace] = code;
 			linePlace++;
 		}
-		
+
 		compileCode(lines);
 		String path = file.getParent();
 		PrintWriter writer = new PrintWriter(new FileWriter(path + file.getName() + ".jsc"));
 		writer.println(machineCodeContents);
 		writer.close();
 	}
-	
+
 	private void compileCode(String[][] code) {
 		//Object[][] newCode = new Object[code.length][3];
 		ArrayList<Object[]> temp = new ArrayList<Object[]>();
