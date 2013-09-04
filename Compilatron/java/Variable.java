@@ -1,4 +1,4 @@
-package tk.jlowe.smla.compiler;
+//package tk.jlowe.smla.compiler;
 
 public class Variable implements Symbol {
 	
