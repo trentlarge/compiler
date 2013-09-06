@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class SMLACompiler {
+public class Compiler {
 	private HashMap<Symbol, Integer> symbolTable;
 	private HashMap<String, Integer> commandTable;
 	private final String[] usableCommands = {"rem", "input", "print", "let", "goto", "if", "end"};
@@ -18,7 +18,7 @@ public class SMLACompiler {
 	private int memoryPointer = 99;
 	private String machineCodeContents;
 
-	public SMLACompiler(File file) {
+	public Compiler(File file) {
 		symbolTable = new HashMap<Symbol, Integer>();
 		machineCodeContents = "";
 		commandTable.put(usableCommands[1], 10);
