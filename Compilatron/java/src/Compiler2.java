@@ -61,7 +61,7 @@ public class Compiler {
 
 				memory[pointer] = 2000 + constants.indexOf(value);
 				pointer++;
-				memory[pointer] = 2100 + command[1];
+				memory[pointer] = 2100 + variables.getKey(command[2]);
 			}
 			else if(command[1].equalsIgnoreCase("goto")) { //Put a new goto
 				memory[pointer] = 4000 + Integer.parseInt(command[2]);
