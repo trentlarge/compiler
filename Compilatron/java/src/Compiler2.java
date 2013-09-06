@@ -32,20 +32,20 @@ public class Compiler {
 			line_numbers.set(next_line_number, pointer);
 			line_number = next_line_number;
 
-			if(command[1].equalsIgnoreCase("rem"))
+			if(command[1].equalsIgnoreCase("rem")) //Ingore comment lines
 				continue;
-			else if(command[1].equalsIgnoreCase("input")) {
+			else if(command[1].equalsIgnoreCase("input")) { //Make a new variable and remember it
 				variables.set(command[2], data_pointer);
 				memory[pointer] = 1000 + data_pointer;
 				data_pointer--;
 			}
-			else if(command[1].equalsIgnoreCase("print")) {
-				if(!variables.containsKey(command[1]))
+			else if(command[1].equalsIgnoreCase("print")) { //Simply print variable
+				if(!variables.containsKey(command[2]))
 					throw new UndefinedVariableException();
 
-				memory[pointer] = 1100 + command[1];
+				memory[pointer] = 1100 + variables.getKey(command[2]);
 			}
-			else if(command[1].equalsIgnoreCase("let")) {
+			else if(command[1].equalsIgnoreCase("let")) { //If a variable doesn't exist, create it then parse the expression
 				if(!variables.containsKey(command[2])) {
 					variables.set(command[2], data_pointer);
 					data_pointer--;
@@ -60,12 +60,14 @@ public class Compiler {
 				pointer++;
 				memory[pointer] = 2100 + command[1];
 			}
-			else if(command[1].equalsIgnoreCase("goto")) {
+			else if(command[1].equalsIgnoreCase("goto")) { //Put a new goto
 				memory[pointer] = 4000 + Integer.parseInt(command[2]);
 			}
-			else if(command[1].equalsIgnoreCase("if"))
-				continue;
-			else if(command[1].equalsIgnoreCase("end"))
+			else if(command[1].equalsIgnoreCase("if")) { //Yay for if's
+				//Call parse relation
+				//Branch 0 to "goto"
+			}
+			else if(command[1].equalsIgnoreCase("end")) //Put a halt
 				memory[pointer] = 4300;
 
 			pointer++;
