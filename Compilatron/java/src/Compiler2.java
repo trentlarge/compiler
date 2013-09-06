@@ -81,8 +81,9 @@ public class Compiler {
 	}
 
 	private void parseRelation(String relation) {
+		Pattern.compile("([a-zA-Z0-9+-*/()]+)(>|<|>=|<=|==|!=)+([a-zA-Z0-9+-*/()]+)");
 	}
 
-	private void parseExpression(String expression) {
+	private void parseExpression(String expression, int value_pointer) {
 	}
 }
