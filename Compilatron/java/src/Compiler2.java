@@ -11,8 +11,8 @@ public class Compiler {
 	public Compiler(File file) {
 		scanner = new Scanner(file);
 		memory = new int[100]();
-		symbols = new ArrayList<Symbol>();
-		variables = new ArrayList<Integer>();
+		constants = new ArrayList<Integer>();
+		line_numbers = new HashMap<Intger, Integer>();
 		variables = new HashMap<String, Integer>();
 		line_number = 0;
 		pointer = 0;
@@ -35,6 +35,9 @@ public class Compiler {
 			if(command[1].equalsIgnoreCase("rem")) //Ingore comment lines
 				continue;
 			else if(command[1].equalsIgnoreCase("input")) { //Make a new variable and remember it
+				if(!Character.isLetter(command[2].charAt(0)))
+					throw new InvalidVariableException();
+
 				variables.set(command[2], data_pointer);
 				memory[pointer] = 1000 + data_pointer;
 				data_pointer--;
