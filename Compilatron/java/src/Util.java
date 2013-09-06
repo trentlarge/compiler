@@ -1,3 +1,7 @@
+import java.awt.GraphicsEnvironment;
+
+import javax.swing.JOptionPane;
+
 public class Util {
 	private static void print(String message) {
 		if(GraphicsEnvironment.isHeadless())
@@ -6,7 +10,7 @@ public class Util {
 			JOptionPane.showMessageDialog();
 	}
 
-	private static void printError(String message) {
+	static void printError(String message) {
 		if(GraphicsEnvironment.isHeadless())
 			System.out.println(message);
 		else
