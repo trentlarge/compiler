@@ -13,7 +13,7 @@ public class Compiler {
 
 	public Compiler(File file) {
 		scanner = new Scanner(file);
-		memory = new int[100]();
+		memory = new int[100];
 		constants = new ArrayList<Integer>();
 		line_numbers = new HashMap<Integer, Integer>();
 		variables = new HashMap<String, Integer>();
@@ -32,7 +32,7 @@ public class Compiler {
 			int next_line_number = Integer.parseInt(command[0]);
 			if(next_line_number <= line_number)
 				throw new LineNumberException();
-			line_numbers.set(next_line_number, pointer);
+			line_numbers.put(next_line_number, pointer);
 			line_number = next_line_number;
 
 			if(command[1].equalsIgnoreCase("rem")) //Ingore comment lines
@@ -41,7 +41,7 @@ public class Compiler {
 				if(!Character.isLetter(command[2].charAt(0)))
 					throw new InvalidVariableException();
 
-				variables.set(command[2], data_pointer);
+				variables.put(command[2], data_pointer);
 				memory[pointer] = 1000 + data_pointer;
 				data_pointer--;
 			}
@@ -49,11 +49,11 @@ public class Compiler {
 				if(!variables.containsKey(command[2]))
 					throw new UndefinedVariableException();
 
-				memory[pointer] = 1100 + variables.getKey(command[2]);
+				memory[pointer] = 1100 + variables.get(command[2]);
 			}
 			else if(command[1].equalsIgnoreCase("let")) { //If a variable doesn't exist, create it then parse the expression
 				if(!variables.containsKey(command[2])) {
-					variables.set(command[2], data_pointer);
+					variables.put(command[2], data_pointer);
 					data_pointer--;
 				}
 
@@ -70,8 +70,10 @@ public class Compiler {
 				memory[pointer] = 4000 + Integer.parseInt(command[2]);
 			}
 			else if(command[1].equalsIgnoreCase("if")) { //Yay for if's
-				//Call parse relation
-				//Branch 0 to "goto"
+				if(!command[3].equalsIgnoreCase("goto"))
+					throw new IllegalArgumentException();
+				parseRelation(command[2]);//Call parse relation
+				memory[pointer] = 4100 + Integer.parseInt(command[4]);//Branch 0 to "goto"
 			}
 			else if(command[1].equalsIgnoreCase("end")) //Put a halt
 				memory[pointer] = 4300;
