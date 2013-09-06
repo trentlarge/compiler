@@ -18,7 +18,7 @@ public class SMLACompiler {
 	private int memoryPointer = 99;
 	private String machineCodeContents;
 
-	public SMLACompiler() {
+	public SMLACompiler(File file) {
 		symbolTable = new HashMap<Symbol, Integer>();
 		machineCodeContents = "";
 		commandTable.put(usableCommands[1], 10);
