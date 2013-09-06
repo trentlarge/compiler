@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Compiler {
+	static Pattern relation_pattern = Pattern.compile("(.+)(>|<|>=|<=|==|!=)+(.+)");
+	static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9+-*/()]+)");
+
 	Scanner scanner;
 	int[] memory;
 	ArrayList<Integer> constants;
@@ -83,9 +86,14 @@ public class Compiler {
 	}
 
 	private void parseRelation(String relation) {
-		Pattern.compile("([a-zA-Z0-9+-*/()]+)(>|<|>=|<=|==|!=)+([a-zA-Z0-9+-*/()]+)");
+		Matcher matcher = relation_pattern.matcher(relation);
+		if(!matcher.matches())
+			throw new SyntaxException();
 	}
 
 	private void parseExpression(String expression, int value_pointer) {
+		Matcher matcher = expression_pattern.matcher(expression);
+		if(!matcher.matches())
+			throw new SyntaxException();
 	}
 }
