@@ -1,14 +1,14 @@
-//package tk.jlowe.smla.compiler;
 
-public class Variable implements Symbol {
-	
-	private String variableName;
-	
-	public Variable(String name){
-		variableName = "Variable" + name;
+public class Variable extends Symbol {
+
+	private int value;
+
+	public Variable(int value, int pointer) {
+		super(pointer);
+		this.value = value;
 	}
-	
-	public int hashCode(){
-		return variableName.hashCode();
+
+	public int getValue() {
+		return value;
 	}
 }

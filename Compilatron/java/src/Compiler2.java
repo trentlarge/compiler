@@ -1,10 +1,13 @@
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Compiler {
 	Scanner scanner;
 	int[] memory;
 	ArrayList<Integer> constants;
-	HashMap<Intger, Integer> line_numbers;
+	HashMap<Integer, Integer> line_numbers;
 	HashMap<String, Integer> variables;
 	int line_number, pointer, data_pointer;
 
@@ -12,7 +15,7 @@ public class Compiler {
 		scanner = new Scanner(file);
 		memory = new int[100]();
 		constants = new ArrayList<Integer>();
-		line_numbers = new HashMap<Intger, Integer>();
+		line_numbers = new HashMap<Integer, Integer>();
 		variables = new HashMap<String, Integer>();
 		line_number = 0;
 		pointer = 0;
