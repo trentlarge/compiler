@@ -57,14 +57,7 @@ public class Compiler {
 					data_pointer--;
 				}
 
-				int value = Integer.parseInt(command[3]);
-
-				if(!constants.contains(value))
-					constants.add(value);
-
-				memory[pointer] = 2000 + constants.indexOf(value);
-				pointer++;
-				memory[pointer] = 2100 + variables.getKey(command[2]);
+				parseExpression(command[3], variables.get(command[2]));
 			}
 			else if(command[1].equalsIgnoreCase("goto")) { //Put a new goto
 				memory[pointer] = 4000 + Integer.parseInt(command[2]);
