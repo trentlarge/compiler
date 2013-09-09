@@ -33,15 +33,16 @@ public class Compiler {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
 
-			String[] command = scanner.nextLine().split(" ");
+			String[] command = scanner.nextLine().split(" "); //Everything is separated by spaces
 
+			//Double check line numbers and save each one as a symbol
 			int next_line_number = Integer.parseInt(command[0]);
 			if(next_line_number <= line_number)
 				throw new LineNumberException();
 			line_numbers.put(next_line_number, pointer);
 			line_number = next_line_number;
 
-			if(command[1].equalsIgnoreCase("rem")) //Ingore comment lines
+			if(command[1].equalsIgnoreCase("rem")) //Ignore comment lines
 				continue;
 			else if(command[1].equalsIgnoreCase("input")) { //Make a new variable and remember it
 				if(!Character.isLetter(command[2].charAt(0)))
@@ -71,8 +72,9 @@ public class Compiler {
 			else if(command[1].equalsIgnoreCase("if")) { //Yay for if's
 				if(!command[3].equalsIgnoreCase("goto"))
 					throw new IllegalArgumentException();
-				parseRelation(command[2]);//Call parse relation
-				memory[pointer] = 4100 + Integer.parseInt(command[4]);//Branch 0 to "goto"
+
+				parseRelation(command[2]); //Call parse relation
+				memory[pointer] = 4100 + Integer.parseInt(command[4]); //Branch 0 to "goto"
 			}
 			else if(command[1].equalsIgnoreCase("end")) //Put a halt
 				memory[pointer] = 4300;
@@ -82,12 +84,14 @@ public class Compiler {
 	}
 
 	private void parseRelation(String relation) {
+		//Check relations based on regexes
 		Matcher matcher = relation_pattern.matcher(relation);
 		if(!matcher.matches())
 			throw new SyntaxException();
 	}
 
 	private void parseExpression(String expression, int value_pointer) {
+		//Check expressions based on regexes
 		Matcher matcher = expression_pattern.matcher(expression);
 		if(!matcher.matches())
 			throw new SyntaxException();
