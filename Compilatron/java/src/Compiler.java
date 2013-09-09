@@ -15,7 +15,7 @@ public class Compiler {
 	ArrayList<Integer> constants;
 	HashMap<Integer, Integer> line_numbers;
 	HashMap<String, Integer> variables;
-	int line_number, pointer, data_pointer;
+	int last_line_number, pointer, data_pointer;
 
 	public Compiler(File file) throws FileNotFoundException {
 		scanner = new Scanner(file);
@@ -23,7 +23,7 @@ public class Compiler {
 		constants = new ArrayList<Integer>();
 		line_numbers = new HashMap<Integer, Integer>();
 		variables = new HashMap<String, Integer>();
-		line_number = 0;
+		last_line_number = 0;
 		pointer = 0;
 		data_pointer = 99;
 	}
@@ -36,11 +36,11 @@ public class Compiler {
 			String[] command = scanner.nextLine().split(" "); //Everything is separated by spaces
 
 			//Double check line numbers and save each one as a symbol
-			int next_line_number = Integer.parseInt(command[0]);
-			if(next_line_number <= line_number)
+			int line_number = Integer.parseInt(command[0]);
+			if(line_number <= last_line_number)
 				throw new LineNumberException();
-			line_numbers.put(next_line_number, pointer);
-			line_number = next_line_number;
+			line_numbers.put(line_number, pointer);
+			last_line_number = line_number;
 
 			if(command[1].equalsIgnoreCase("rem")) //Ignore comment lines
 				continue;
@@ -73,8 +73,7 @@ public class Compiler {
 				if(!command[3].equalsIgnoreCase("goto"))
 					throw new IllegalArgumentException();
 
-				parseRelation(command[2]); //Call parse relation
-				memory[pointer] = 4100 + Integer.parseInt(command[4]); //Branch 0 to "goto"
+				parseRelation(command[2], Integer.parseInt(command[4])); //Call parse relation
 			}
 			else if(command[1].equalsIgnoreCase("end")) //Put a halt
 				memory[pointer] = 4300;
@@ -83,11 +82,58 @@ public class Compiler {
 		}
 	}
 
-	private void parseRelation(String relation) {
+	private void parseRelation(String relation, int goto_symbol) {
 		//Check relations based on regexes
 		Matcher matcher = relation_pattern.matcher(relation);
 		if(!matcher.matches())
 			throw new SyntaxException();
+
+		parseExpression(matcher.group(1), data_pointer);
+		data_pointer--;
+		parseExpression(matcher.group(3), data_pointer);
+
+		memory[pointer] = 2000 + data_pointer;
+		pointer++;
+
+		if(matcher.group(2).charAt(0) == '>') {
+			memory[pointer] = 3100 + data_pointer + 1; //First number
+			pointer++;
+			memory[pointer] = 4200 + goto_symbol; //Branch negative to "goto"
+			if(matcher.group(2).charAt(1) == '=') {
+				pointer++;
+				memory[pointer] = 4100 + goto_symbol; //Also branch zero if equal to
+			}
+		}
+		else if(matcher.group(2).charAt(0) == '<') {
+			memory[pointer - 1] = 2000 + data_pointer + 1;
+			memory[pointer] = 3100 + data_pointer;
+			pointer++;
+			memory[pointer] = 4200 + goto_symbol;
+			if(matcher.group(2).charAt(1) == '=') {
+				pointer++;
+				memory[pointer] = 4100 + goto_symbol;
+			}
+		}
+		else if(matcher.group(2).equals("==")) {
+			memory[pointer] = 3100 + data_pointer + 1;
+			pointer++;
+			memory[pointer] = 4100 + goto_symbol;
+		}
+		else if(matcher.group(2).equals("!=")) {
+			if(!constants.contains(-1))
+				constants.add(-1);
+
+			memory[pointer] = 3100 + data_pointer + 1;
+			pointer++;
+			memory[pointer] = 4200 + goto_pointer;
+			pointer++;
+			memory[pointer] = 3300 + constants.indexOf(-1);
+			pointer++;
+			memory[pointer] = 4200 + goto_pointer;
+		}
+
+		pointer++;
+		data_pointer--;
 	}
 
 	private void parseExpression(String expression, int value_pointer) {
