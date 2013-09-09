@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
@@ -16,7 +17,7 @@ public class Compiler {
 	HashMap<String, Integer> variables;
 	int line_number, pointer, data_pointer;
 
-	public Compiler(File file) {
+	public Compiler(File file) throws FileNotFoundException {
 		scanner = new Scanner(file);
 		memory = new int[100];
 		constants = new ArrayList<Integer>();
