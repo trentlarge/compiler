@@ -28,7 +28,7 @@ public class Compiler {
 		data_pointer = 99;
 	}
 
-	public int[] compile() {
+	public int[] compile() throws OutOfMemoryException, LineNumberException, InvalidVariableException, UndefinedVaribleException, IllegalArgumentException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
@@ -82,7 +82,7 @@ public class Compiler {
 		}
 	}
 
-	private void parseRelation(String relation, int goto_symbol) {
+	private void parseRelation(String relation, int goto_symbol) throws SyntaxException {
 		//Check relations based on regexes
 		Matcher matcher = relation_pattern.matcher(relation);
 		if(!matcher.matches())
@@ -136,7 +136,7 @@ public class Compiler {
 		data_pointer--;
 	}
 
-	private void parseExpression(String expression, int value_pointer) {
+	private void parseExpression(String expression, int value_pointer) throws SyntaxException {
 		//Check expressions based on regexes
 		Matcher matcher = expression_pattern.matcher(expression);
 		if(!matcher.matches())
