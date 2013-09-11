@@ -125,11 +125,11 @@ public class Compiler {
 
 			memory[pointer] = 3100 + data_pointer + 1;
 			pointer++;
-			memory[pointer] = 4200 + goto_pointer;
+			memory[pointer] = 4200 + goto_symbol;
 			pointer++;
 			memory[pointer] = 3300 + constants.indexOf(-1);
 			pointer++;
-			memory[pointer] = 4200 + goto_pointer;
+			memory[pointer] = 4200 + goto_symbol;
 		}
 
 		pointer++;
