@@ -13,7 +13,7 @@ public class Compilatron {
 		try {
 			file = chooser.getSelectedFile();
 		}
-		catch(IOException e) {
+		catch(Exception e) {
 			Util.printError("Could not open file: " + e);
 		}
 
@@ -25,13 +25,19 @@ public class Compilatron {
 		}
 		catch(IOException e) {
 			Util.printError("Could not open file: " + e);
+			System.exit(1);
 		}
-
-		for(int i = 0; i < memory.length; i++) {
-			output.write(memory[i]);
-			for(int ii = 1; ii < 10; ii++)
-				output.write(" " + memory[i + ii]);
-			output.write("\n");
+		try {
+			for(int i = 0; i < memory.length; i++) {
+				output.write(memory[i]);
+				for(int ii = 1; ii < 10; ii++)
+					output.write(" " + memory[i + ii]);
+				output.write("\n");
+			}
+		}
+		catch(IOException e) {
+			Util.printError("Could not write to file: " + e);
+			System.exit(1);
 		}
 	}
 }
