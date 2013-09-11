@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import javax.swing.JFileChooser;
 
 public class Compilatron {
@@ -27,6 +26,7 @@ public class Compilatron {
 			Util.printError("Could not open file: " + e);
 			System.exit(1);
 		}
+
 		try {
 			for(int i = 0; i < memory.length; i++) {
 				output.write(memory[i]);

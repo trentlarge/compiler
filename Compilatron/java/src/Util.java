@@ -1,5 +1,4 @@
 import java.awt.GraphicsEnvironment;
-
 import javax.swing.JOptionPane;
 
 public class Util {
