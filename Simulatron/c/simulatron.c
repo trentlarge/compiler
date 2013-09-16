@@ -218,6 +218,9 @@ int main(int argc, char * argv[]) {
 			case 21:
 				memory[argument] = accumulator;
 				break;
+			case 22:
+				accumulator = argument;
+				break;
 			case 30:
 				accumulator += memory[argument];
 				if(warnings && (accumulator >= val_width || accumulator <= -val_width))

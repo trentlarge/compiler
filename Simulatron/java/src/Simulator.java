@@ -36,6 +36,9 @@ public class Simulator {
 			case 21:
 				memory[argument] = accumulator;
 				break;
+			case 22:
+				accumulator = argument;
+				break;
 			case 30:
 				accumulator += memory[argument];
 				break;
