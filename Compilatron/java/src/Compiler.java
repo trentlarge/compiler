@@ -7,8 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Compiler {
-	static Pattern relation_pattern = Pattern.compile("(.+)(>|<|>=|<=|==|!=)+(.+)");
-	static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9+-*/()]+)");
+	private final static Pattern relation_pattern = Pattern.compile("(.+)(>|<|>=|<=|==|!=)+(.+)");
+	private final static Pattern operators = Pattern.compile("([+-*/()]+)");
+	private final static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9" + operators.pattern() + "]+)");
 
 	Scanner scanner;
 	int[] memory;
@@ -59,12 +60,20 @@ public class Compiler {
 				memory[pointer] = 1100 + variables.get(command[2]);
 			}
 			else if(command[1].equalsIgnoreCase("let")) { //If a variable doesn't exist, create it then parse the expression
-				if(!variables.containsKey(command[2])) {
-					variables.put(command[2], data_pointer);
+				String[] params = command[2].split("=", 1);
+
+				if(params.length < 2)
+					throw new SyntaxException();
+
+				if(!Character.isLetter(params[0].charAt(0)))
+					throw new InvalidVariableException();
+
+				if(!variables.containsKey(params[0])) {
+					variables.put(params[0], data_pointer);
 					data_pointer--;
 				}
 
-				parseExpression(command[3], variables.get(command[2]));
+				parseExpression(params[1], variables.get(params[0]));
 			}
 			else if(command[1].equalsIgnoreCase("goto")) { //Put a new goto
 				memory[pointer] = 4000 + Integer.parseInt(command[2]);
