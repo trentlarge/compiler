@@ -154,26 +154,76 @@ public class Compiler {
 
 		ArrayList<String> postfix = convertToPostfix(expression);
 
+		int temp_data_pointer = data_pointer;
 		for(int i = 0; i < postfix.size(); i++) {
-			if(operators.indexOf(postfix[i].charAt(0)) != -1) {
+			int operator = operators.indexOf(postfix[i].charAt(0));
+			if(operator != -1) {
+				if(temp_data_pointer < pointer) {
+					//You dun goofed!
+				}
+
 				int operand;
-				int load;
-				if(Character.isLetter(postfix[i].charAt(0))) {
-					if(!variables.containsKey(postfix[i])) {
-						variables.put(postfix[i], data_pointer);
+				if(Character.isLetter(postfix[i - 1].charAt(0))) {
+					if(!variables.containsKey(postfix[i - 1])) {
+						variables.put(postfix[i - 1], data_pointer);
 						data_pointer--;
 					}
 
-					load = variables.get(postfix[i]);
+					operand = variables.get(postfix[i - 1]);
 				}
 				else {
-					int number = Integer.parseInt(postfix[i]);
+					int number = Integer.parseInt(postfix[i - 1]);
+
+					if(!constants.contains(number))
+						constants.add(number);
+
+					operand = constants.indexOf(number);
+				}
+
+				int load;
+				if(operators.indexOf(postfix[i - 1].charAt(0)) != -1) {
+					operand = temp_data_pointer;
+					temp_data_pointer++;
+				}
+				else if(Character.isLetter(postfix[i - 2].charAt(0))) {
+					if(!variables.containsKey(postfix[i - 2])) {
+						variables.put(postfix[i - 2], data_pointer);
+						data_pointer--;
+					}
+
+					load = variables.get(postfix[i - 2]);
+				}
+				else {
+					int number = Integer.parseInt(postfix[i - 2]);
 
 					if(!constants.contains(number))
 						constants.add(number);
 
 					load = constants.indexOf(number);
 				}
+
+				memory[pointer] = 2000 + load;
+				pointer++;
+				switch(operator) {
+					case 0:
+						memory[pointer] = 3000 + operand;
+						break;
+					case 1:
+						memory[pointer] = 3100 + operand;
+						break;
+					case 2:
+						memory[pointer] = 3200 + operand;
+						break;
+					case 3:
+						memory[pointer] = 3300 + operand;
+						break;
+					default:
+						//You dun goofed!
+				}
+				pointer++;
+				memory[pointer] = 2100 + temp_data_pointer;
+				pointer++;
+				temp_data_pointer--;
 			}
 		}
 	}
