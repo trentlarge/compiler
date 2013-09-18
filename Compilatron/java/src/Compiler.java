@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Scanner;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -175,5 +176,29 @@ public class Compiler {
 				}
 			}
 		}
+	}
+
+	private ArrayList<String> convertToPostfix(String infix) {
+		ArrayList<String> postfix = new ArrayList<String>();
+		Stack<Character> processStack = new Stack<Character>();
+		char[] chars = infix.toCharArray();
+		for(int i = 0; i < chars.length; i++) {
+			String term = new String();
+			while(operators.indexOf(chars[i]) == -1) {
+				term += chars[i];
+				i++;
+			}
+			postfix.add(term);
+			if(processStack.empty()) {
+				processStack.push(chars[i]);
+			}
+			else {
+				while(operators.indexOf(chars[i]) <= operators.indexOf(processStack.peek())) {
+					postfix.add(Character.toString(processStack.pop()));
+				}
+				processStack.push(chars[i]);
+			}
+		}
+		return postfix;
 	}
 }
