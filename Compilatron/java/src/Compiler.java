@@ -184,7 +184,7 @@ public class Compiler {
 		char[] chars = infix.toCharArray();
 		for(int i = 0; i < chars.length; i++) {
 			String term = new String();
-			while(operators.indexOf(chars[i]) == -1) {
+			while(operators.indexOf(chars[i]) == -1 || i == 0 || (i > 0 && operators.indexOf(chars[i - 1]) != -1 && operators.indexOf(chars[i]) == 1)) {
 				term += chars[i];
 				i++;
 			}
