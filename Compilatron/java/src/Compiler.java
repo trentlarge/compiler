@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 
 public class Compiler {
 	private final static Pattern relation_pattern = Pattern.compile("(.+)(>|<|>=|<=|==|!=)+(.+)");
-	private final static Pattern operators = Pattern.compile("([+-*/()]+)");
-	private final static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9" + operators.pattern() + "]+)");
+	private final static String operators = "+-*/()";
+	private final static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9" + operators + "]+)");
 
 	Scanner scanner;
 	int[] memory;
@@ -145,10 +145,35 @@ public class Compiler {
 		data_pointer--;
 	}
 
-	private void parseExpression(String expression, int value_pointer) throws SyntaxException {
+	private void parseExpression(String expression, int value_pointer) throws SyntaxException, NumberFormatException {
 		//Check expressions based on regexes
 		Matcher matcher = expression_pattern.matcher(expression);
 		if(!matcher.matches())
 			throw new SyntaxException();
+
+		ArrayList<String> postfix = convertToPostfix(expression);
+
+		for(int i = 0; i < postfix.size(); i++) {
+			if(operators.indexOf(postfix[i].charAt(0)) != -1) {
+				int operand;
+				int load;
+				if(Character.isLetter(postfix[i].charAt(0))) {
+					if(!variables.containsKey(postfix[i])) {
+						variables.put(postfix[i], data_pointer);
+						data_pointer--;
+					}
+
+					load = variables.get(postfix[i]);
+				}
+				else {
+					int number = Integer.parseInt(postfix[i]);
+
+					if(!constants.contains(number))
+						constants.add(number);
+
+					load = constants.indexOf(number);
+				}
+			}
+		}
 	}
 }
