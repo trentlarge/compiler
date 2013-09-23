@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -209,7 +210,7 @@ public class Compiler {
 		if(!matcher.matches())
 			throw new SyntaxException();
 
-		ArrayList<String> postfix = convertToPostfix(expression);
+		LinkedList<String> postfix = convertToPostfix(expression);
 
 		int temp_data_pointer = data_pointer;
 		for(int i = 0; i < postfix.size(); i++) {
@@ -285,8 +286,8 @@ public class Compiler {
 		}
 	}
 
-	private ArrayList<String> convertToPostfix(String infix) {
-		ArrayList<String> postfix = new ArrayList<String>();
+	private LinkedList<String> convertToPostfix(String infix) {
+		LinkedList<String> postfix = new LinkedList<String>();
 		Stack<Character> processStack = new Stack<Character>();
 		char[] chars = infix.toCharArray();
 		for(int i = 0; i < chars.length; i++) {
