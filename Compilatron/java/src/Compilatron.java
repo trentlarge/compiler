@@ -14,10 +14,44 @@ public class Compilatron {
 		}
 		catch(Exception e) {
 			Util.printError("Could not open file: " + e);
+			System.exit(1);
 		}
 
-		Compiler compiler = new Compiler(file);
-		int[] memory = compiler.compile();
+		Compiler compiler;
+		try {
+			compiler = new Compiler(file);
+		}
+		catch(FileNotFoundException e) {
+			Util.printError("Could not open file: " + e);
+			System.exit(1);
+		}
+
+		int[] memory;
+		try {
+			memory = compiler.compile();
+		}
+		catch(OutOfMemoryException e) {
+			Util.printError("Error: Program requires more memory");
+			System.exit(3);
+		}
+		catch(IllegalArgumentException e) {
+			System.exit(4);
+		}
+		catch(InvalidVariableException e) {
+			System.exit(4);
+		}
+		catch(SyntaxException e) {
+			System.exit(4);
+		}
+		catch(GotoException e) {
+			System.exit(5);
+		}
+		catch(LineNumberException e) {
+			System.exit(5);
+		}
+		catch(UndefinedVariableException e) {
+			System.exit(5);
+		}
 
 		try {
 			output = new FileWriter(chooser.getSelectedFile());
@@ -37,7 +71,7 @@ public class Compilatron {
 		}
 		catch(IOException e) {
 			Util.printError("Could not write to file: " + e);
-			System.exit(1);
+			System.exit(2);
 		}
 	}
 }
