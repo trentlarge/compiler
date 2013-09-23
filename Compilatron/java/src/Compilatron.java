@@ -1,7 +1,7 @@
 /**
  * Main class that reads the code, calls Compiler, and writes the SML.
  * 
- * Variables can be any string token starting with a letter.
+ * Variables can be any string token containing letters and numbers and starting with a letter.
  * 
  * Valid commands include:
  * 	rem								- Comment line (does not have to start with a number)
@@ -15,7 +15,9 @@
  * Statements are done in the form:
  * 	[line] [command] [args]
  * 
- * 	Number constants are stored at the end of the program and variables are stored at the end of the memory.
+ * Line numbers must be sequential.
+ * 
+ * Number constants are stored at the end of the program and variables are stored at the end of the memory.
  *  
  * @author Foster Mclane and Jonathan Lowe
  */
