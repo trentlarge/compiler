@@ -1,0 +1,11 @@
+00 rem Fibanacci Program
+10 input x
+15 let y=1
+16 let z=0
+20 if x==0 goto 70
+30 let y=y+z
+40 let x=x-1
+50 let z=y-z
+60 goto 20
+70 print y
+80 end
