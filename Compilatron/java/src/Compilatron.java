@@ -77,7 +77,7 @@ public class Compilatron {
 			System.exit(4);
 		}
 		catch(GotoException e) {
-			Util.printError("Error: Tried to goto a nonexistent line at " + compiler.getLineNumber());
+			Util.printError("Error 404: Destination not found at " + compiler.getLineNumber());
 			System.exit(5);
 		}
 		catch(LineNumberException e) {
