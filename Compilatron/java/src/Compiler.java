@@ -38,6 +38,10 @@ public class Compiler {
 		return last_line_number;
 	}
 
+	public int getPointer() {
+		return pointer;
+	}
+
 	public int[] compile() throws OutOfMemoryException, ArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
@@ -66,6 +70,7 @@ public class Compiler {
 
 				variables.put(command[2], data_pointer);
 				memory[pointer] = 1000 + data_pointer;
+				pointer++;
 				data_pointer--;
 			}
 			//Simply print variable
@@ -74,6 +79,7 @@ public class Compiler {
 					throw new UndefinedVariableException();
 
 				memory[pointer] = 1100 + variables.get(command[2]);
+				pointer++;
 			}
 			//If a variable doesn't exist, create it then parse the expression
 			else if(command[1].equalsIgnoreCase("let")) {
@@ -99,6 +105,7 @@ public class Compiler {
 					line_number_list.add(goto_line);
 
 				memory[pointer] = 14000 + line_number_list.indexOf(goto_line);
+				pointer++;
 			}
 			//Yay for if's
 			else if(command[1].equalsIgnoreCase("if")) {
@@ -112,16 +119,15 @@ public class Compiler {
 				parseRelation(command[2], line_number_list.indexOf(goto_line)); //Call parse relation
 			}
 			//Put a halt
-			else if(command[1].equalsIgnoreCase("end"))
+			else if(command[1].equalsIgnoreCase("end")) {
 				memory[pointer] = 4300;
-
-			pointer++;
+				pointer++;
+			}
 		}
 
 		//Make sure we still have room for constants
-		if(pointer + constants.size() > data_pointer) {
-			//You dun goofed
-		}
+		if(pointer + constants.size() > data_pointer)
+			throw new OutOfMemoryException();
 
 		//Space the constants on the end of the program
 		for(int i = 0; i < constants.size(); i++)
@@ -141,7 +147,7 @@ public class Compiler {
 					//Equivalent to (opcode - 100) * 100 + pointer + memory[i] % 100
 					memory[i] = memory[i] - 10000 + pointer;
 					break;
-				//Line numbers
+					//Line numbers
 				case 140:
 				case 141:
 				case 142:
@@ -154,11 +160,13 @@ public class Compiler {
 					break;
 			}
 		}
-		
+
+		pointer += constants.size();
+
 		return memory;
 	}
 
-	private void parseRelation(String relation, int goto_symbol) throws SyntaxException, NumberFormatException, UndefinedVariableException {
+	private void parseRelation(String relation, int goto_symbol) throws OutOfMemoryException, SyntaxException, NumberFormatException, UndefinedVariableException {
 		//Check relations based on regexes
 		Matcher matcher = relation_pattern.matcher(relation);
 		if(!matcher.matches())
@@ -174,7 +182,7 @@ public class Compiler {
 		if(matcher.group(2).charAt(0) == '>') {
 			memory[pointer] = 3100 + data_pointer + 1; //First number
 			pointer++;
-			memory[pointer] = 14200 + goto_symbol; //Branch negative to "goto"
+			memory[pointer] = 14100 + goto_symbol; //Branch negative to "goto"
 			if(matcher.group(2).charAt(1) == '=') {
 				pointer++;
 				memory[pointer] = 4100 + goto_symbol; //Also branch zero if equal to
@@ -184,7 +192,7 @@ public class Compiler {
 			memory[pointer - 1] = 2000 + data_pointer + 1;
 			memory[pointer] = 3100 + data_pointer;
 			pointer++;
-			memory[pointer] = 14200 + goto_symbol;
+			memory[pointer] = 14100 + goto_symbol;
 			if(matcher.group(2).charAt(1) == '=') {
 				pointer++;
 				memory[pointer] = 14100 + goto_symbol;
@@ -193,7 +201,7 @@ public class Compiler {
 		else if(matcher.group(2).equals("==")) {
 			memory[pointer] = 3100 + data_pointer + 1;
 			pointer++;
-			memory[pointer] = 14100 + goto_symbol;
+			memory[pointer] = 14200 + goto_symbol;
 		}
 		else if(matcher.group(2).equals("!=")) {
 			if(!constants.contains(-1))
@@ -201,18 +209,18 @@ public class Compiler {
 
 			memory[pointer] = 3100 + data_pointer + 1;
 			pointer++;
-			memory[pointer] = 14200 + goto_symbol;
+			memory[pointer] = 14100 + goto_symbol;
 			pointer++;
 			memory[pointer] = 13300 + constants.indexOf(-1);
 			pointer++;
-			memory[pointer] = 14200 + goto_symbol;
+			memory[pointer] = 14100 + goto_symbol;
 		}
 
 		pointer++;
 		data_pointer--;
 	}
 
-	private void parseExpression(String expression, int value_pointer) throws SyntaxException, NumberFormatException, UndefinedVariableException {
+	private void parseExpression(String expression, int value_pointer) throws OutOfMemoryException, SyntaxException, NumberFormatException, UndefinedVariableException {
 		//Check expressions based on regexes
 		Matcher matcher = expression_pattern.matcher(expression);
 		if(!matcher.matches())
@@ -253,9 +261,8 @@ public class Compiler {
 		while(postfix.hasNext()) {
 			int operator = operators.indexOf(postfix.next().charAt(0));
 			if(operator != -1) {
-				if(temp_data_pointer < pointer) {
-					//You dun goofed!
-				}
+				if(temp_data_pointer < pointer)
+					throw new OutOfMemoryException();
 
 				postfix.previous();
 
@@ -316,21 +323,22 @@ public class Compiler {
 					case 3:
 						memory[pointer] = 3300 + operand_symbol;
 						break;
-					default:
-						//You dun goofed!
 				}
 				pointer++;
-				memory[pointer] = 2100 + temp_data_pointer;
+				postfix.remove();
+				postfix.next();
+				postfix.remove();
+				postfix.next();
+				postfix.remove();
+				if(postfix.hasNext()) {
+					memory[pointer] = 2100 + temp_data_pointer;
+					postfix.add("." + temp_data_pointer);
+					temp_data_pointer--;
+				}
+				else {
+					memory[pointer] = 2100 + value_pointer;
+				}
 				pointer++;
-
-				postfix.remove();
-				postfix.next();
-				postfix.remove();
-				postfix.next();
-				postfix.remove();
-				postfix.add("." + temp_data_pointer);
-
-				temp_data_pointer--;
 			}
 		}
 	}

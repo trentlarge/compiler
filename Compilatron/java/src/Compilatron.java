@@ -75,18 +75,12 @@ public class Compilatron {
 			System.exit(1);
 		}
 
-//		try {
-			for(int i = 0; i < memory.length / 10; i++) {
-				output.print(memory[i * 10]);
-				for(int ii = 1; ii < 10; ii++)
-					output.print(" " + memory[i * 10 + ii]);
-				output.println();
-			}
-			output.close();
-//		}
-/*		catch(IOException e) {
-			Util.printError("Could not write to file: " + e);
-			System.exit(2);
-		}*/
+		for(int i = 0; i <= compiler.getPointer() / 10; i++) {
+			output.print(memory[i * 10]);
+			for(int ii = 1; ii < 10; ii++)
+				output.print(" " + memory[i * 10 + ii]);
+			output.println();
+		}
+		output.close();
 	}
 }
