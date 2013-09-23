@@ -1,3 +1,9 @@
+/**
+ * Compiles the SIMPLE program into a memory array that can be run in an SML interpreter.
+ * 
+ * @author Foster Mclane and Jonathan Lowe
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -22,6 +28,12 @@ public class Compiler {
 	HashMap<String, Integer> variables;
 	int last_line_number, pointer, data_pointer;
 
+	/**
+	 * Constructs a new Compiler object given a file
+	 * 
+	 * @param file The SIMPLE file
+	 * @throws FileNotFoundException Thrown if the file does not exist
+	 */
 	public Compiler(File file) throws FileNotFoundException {
 		scanner = new Scanner(file);
 		memory = new int[100];
@@ -34,20 +46,48 @@ public class Compiler {
 		data_pointer = 99;
 	}
 
+	/**
+	 * Return the current SIMPLE line number
+	 * 
+	 * @return The line number
+	 */
 	public int getLineNumber() {
 		return last_line_number;
 	}
 
+	/**
+	 * Return the current SML pointer
+	 * 
+	 * @return The memory pointer
+	 */
 	public int getPointer() {
 		return pointer;
 	}
 
+	/**
+	 * Compile the SIMPLE into an SML memory array
+	 * 
+	 * @return The SML memory array
+	 * 
+	 * @throws OutOfMemoryException Ran out of SML memory
+	 * @throws ArgumentException If without a goto
+	 * @throws InvalidVariableException Variable doesn't start with a letter
+	 * @throws NumberFormatException Invalid number
+	 * @throws SyntaxException SIMPLE syntax error
+	 * @throws GotoException Goto nonexistent line
+	 * @throws LineNumberException Line numbers don't increase
+	 * @throws UndefinedVariableException Variable accessed before it exists
+	 */
 	public int[] compile() throws OutOfMemoryException, ArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
 
 			String[] command = scanner.nextLine().split(" "); //Everything is separated by spaces
+
+			//Ignore comment lines
+			if(command[0].equalsIgnoreCase("rem") || command[1].equalsIgnoreCase("rem"))
+				continue;
 
 			//Double check line numbers
 			int line_number = Integer.parseInt(command[0]);
@@ -60,11 +100,8 @@ public class Compiler {
 			line_numbers.put(line_number, pointer);
 			last_line_number = line_number;
 
-			//Ignore comment lines
-			if(command[1].equalsIgnoreCase("rem"))
-				continue;
 			//Make a new variable and remember it
-			else if(command[1].equalsIgnoreCase("input")) {
+			if(command[1].equalsIgnoreCase("input")) {
 				if(!Character.isLetter(command[2].charAt(0)))
 					throw new InvalidVariableException();
 

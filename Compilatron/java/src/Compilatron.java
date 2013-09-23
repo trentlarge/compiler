@@ -1,3 +1,23 @@
+/**
+ * Main class that reads the code, calls Compiler, and writes the SML.
+ * 
+ * Variables can be any string token starting with a letter.
+ * 
+ * Valid commands include:
+ * 	rem								- Comment line (does not have to start with a number)
+ * 	input [variable]				- Grab an input value from the user and store in [variable]
+ * 	print [variable]				- Print the contents of [variable]
+ * 	if [relation] goto [line]		- Goto [line] if [relation] is true.  Relation must not contain spaces and valid relational operators include >,<,>=,<=,==,!= and have expressions on either side
+ * 	let [variable]=[expression]		- Set [variable] to the result of [expression].  Expression must not contain spaces and valid expression operators include +,-,*,/
+ * 	goto [line]						- Goto [line]
+ * 	end								- Halts the program
+ * 
+ * Statements are done in the form:
+ * 	[line] [command] [args]
+ *  
+ * @author Foster Mclane and Jonathan Lowe
+ */
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
