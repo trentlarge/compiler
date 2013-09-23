@@ -1,16 +1,17 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 
 public class Compilatron {
 	public static void main(String[] args) {
 		JFileChooser chooser = new JFileChooser();
-		File file;
-		FileWriter output;
 
+		File file = null;
 		try {
+			chooser.showOpenDialog(null);
 			file = chooser.getSelectedFile();
 		}
 		catch(Exception e) {
@@ -18,7 +19,7 @@ public class Compilatron {
 			System.exit(1);
 		}
 
-		Compiler compiler;
+		Compiler compiler = null;
 		try {
 			compiler = new Compiler(file);
 		}
@@ -27,7 +28,7 @@ public class Compilatron {
 			System.exit(1);
 		}
 
-		int[] memory;
+		int[] memory = null;
 		try {
 			memory = compiler.compile();
 		}
@@ -35,7 +36,7 @@ public class Compilatron {
 			Util.printError("Error: Program can only learn 100 moves");
 			System.exit(3);
 		}
-		catch(IllegalArgumentException e) {
+		catch(ArgumentException e) {
 			Util.printError("Error: Lonely if statement at " + compiler.getLineNumber());
 			System.exit(4);
 		}
@@ -64,25 +65,28 @@ public class Compilatron {
 			System.exit(5);
 		}
 
+		PrintWriter output = null;
 		try {
-			output = new FileWriter(chooser.getSelectedFile());
+			chooser.showOpenDialog(null);
+			output = new PrintWriter(new FileWriter(chooser.getSelectedFile()));
 		}
 		catch(IOException e) {
 			Util.printError("Could not open file: " + e);
 			System.exit(1);
 		}
 
-		try {
-			for(int i = 0; i < memory.length; i++) {
-				output.write(memory[i]);
+//		try {
+			for(int i = 0; i < memory.length / 10; i++) {
+				output.print(memory[i * 10]);
 				for(int ii = 1; ii < 10; ii++)
-					output.write(" " + memory[i + ii]);
-				output.write("\n");
+					output.print(" " + memory[i * 10 + ii]);
+				output.println();
 			}
-		}
-		catch(IOException e) {
+			output.close();
+//		}
+/*		catch(IOException e) {
 			Util.printError("Could not write to file: " + e);
 			System.exit(2);
-		}
+		}*/
 	}
 }

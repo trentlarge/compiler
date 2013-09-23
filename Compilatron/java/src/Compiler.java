@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Scanner;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -11,7 +12,7 @@ import java.util.regex.Pattern;
 public class Compiler {
 	private final static Pattern relation_pattern = Pattern.compile("(.+)(>|<|>=|<=|==|!=)+(.+)");
 	private final static String operators = "+-*/()";
-	private final static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9" + operators + "]+)");
+	private final static Pattern expression_pattern = Pattern.compile("([a-zA-Z0-9+\\-*/]+)");
 
 	Scanner scanner;
 	int[] memory;
@@ -28,7 +29,7 @@ public class Compiler {
 		line_number_list = new ArrayList<Integer>();
 		line_numbers = new HashMap<Integer, Integer>();
 		variables = new HashMap<String, Integer>();
-		last_line_number = 0;
+		last_line_number = -1;
 		pointer = 0;
 		data_pointer = 99;
 	}
@@ -37,7 +38,7 @@ public class Compiler {
 		return last_line_number;
 	}
 
-	public int[] compile() throws OutOfMemoryException, IllegalArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
+	public int[] compile() throws OutOfMemoryException, ArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
@@ -76,7 +77,7 @@ public class Compiler {
 			}
 			//If a variable doesn't exist, create it then parse the expression
 			else if(command[1].equalsIgnoreCase("let")) {
-				String[] params = command[2].split("=", 1);
+				String[] params = command[2].split("=", 2);
 
 				if(params.length < 2)
 					throw new SyntaxException();
@@ -102,9 +103,13 @@ public class Compiler {
 			//Yay for if's
 			else if(command[1].equalsIgnoreCase("if")) {
 				if(!command[3].equalsIgnoreCase("goto"))
-					throw new IllegalArgumentException();
+					throw new ArgumentException();
 
-				parseRelation(command[2], Integer.parseInt(command[4])); //Call parse relation
+				int goto_line = Integer.parseInt(command[4]);
+				if(!line_number_list.contains(goto_line))
+					line_number_list.add(goto_line);
+
+				parseRelation(command[2], line_number_list.indexOf(goto_line)); //Call parse relation
 			}
 			//Put a halt
 			else if(command[1].equalsIgnoreCase("end"))
@@ -123,22 +128,25 @@ public class Compiler {
 			memory[pointer + i] = constants.get(i);
 
 		for(int i = 0; i < 100; i++) {
-			int opcode = memory[i] % 100;
+			int opcode = memory[i] / 100;
 			switch(opcode) {
 				//Constants
+				case 120:
+				case 121:
 				case 130:
 				case 131:
 				case 132:
 				case 133:
-					//Take 1 off of the opcode then add the appropriate pointer to the constant
-					memory[i] = (opcode - 100) * 100 + pointer + memory[i] / 100;
+					//Take the 1 flag from the front then increment the constant index to point to the constant at the end of the program
+					//Equivalent to (opcode - 100) * 100 + pointer + memory[i] % 100
+					memory[i] = memory[i] - 10000 + pointer;
 					break;
 				//Line numbers
 				case 140:
 				case 141:
 				case 142:
 					//Check that the line number exists
-					Integer line_number_pointer = line_numbers.get(line_number_list.get(memory[i] / 100));
+					Integer line_number_pointer = line_numbers.get(line_number_list.get(memory[i] % 100));
 					if(line_number_pointer == null)
 						throw new GotoException();
 
@@ -150,7 +158,7 @@ public class Compiler {
 		return memory;
 	}
 
-	private void parseRelation(String relation, int goto_symbol) throws SyntaxException, NumberFormatException {
+	private void parseRelation(String relation, int goto_symbol) throws SyntaxException, NumberFormatException, UndefinedVariableException {
 		//Check relations based on regexes
 		Matcher matcher = relation_pattern.matcher(relation);
 		if(!matcher.matches())
@@ -204,13 +212,42 @@ public class Compiler {
 		data_pointer--;
 	}
 
-	private void parseExpression(String expression, int value_pointer) throws SyntaxException, NumberFormatException {
+	private void parseExpression(String expression, int value_pointer) throws SyntaxException, NumberFormatException, UndefinedVariableException {
 		//Check expressions based on regexes
 		Matcher matcher = expression_pattern.matcher(expression);
 		if(!matcher.matches())
 			throw new SyntaxException();
 
-		ListIterator<String> postfix = convertToPostfix(expression).listIterator();
+		LinkedList<String> postfix_list = convertToPostfix(expression);
+		ListIterator<String> postfix = postfix_list.listIterator();
+
+		if(postfix_list.size() == 1) {
+			String value = postfix.next();
+			int value_symbol;
+			if(Character.isLetter(value.charAt(0))) {
+				//Check if variable exists before using it
+				if(!variables.containsKey(value))
+					throw new UndefinedVariableException();
+
+				value_symbol = variables.get(value);
+			}
+			else {
+				int number = Integer.parseInt(value);
+
+				if(!constants.contains(number))
+					constants.add(number);
+
+				//This is a constant so mark it
+				value_symbol = 10000 + constants.indexOf(number);
+			}
+
+			memory[pointer] = 2000 + value_symbol;
+			pointer++;
+			memory[pointer] = 2100 + value_pointer;
+			pointer++;
+
+			return;
+		}
 
 		int temp_data_pointer = data_pointer;
 		while(postfix.hasNext()) {
@@ -220,16 +257,16 @@ public class Compiler {
 					//You dun goofed!
 				}
 
+				postfix.previous();
+
 				String operand = postfix.previous();
 				int operand_symbol;
 				if(operand.charAt(0) == '.') {
 					operand_symbol = Integer.parseInt(operand.substring(1));
 				}
 				else if(Character.isLetter(operand.charAt(0))) {
-					if(!variables.containsKey(operand)) {
-						variables.put(operand, data_pointer);
-						data_pointer--;
-					}
+					if(!variables.containsKey(operand))
+						throw new UndefinedVariableException();
 
 					operand_symbol = variables.get(operand);
 				}
@@ -239,7 +276,7 @@ public class Compiler {
 					if(!constants.contains(number))
 						constants.add(number);
 
-					//This is a constant so marked it
+					//This is a constant so mark it
 					operand_symbol = 10000 + constants.indexOf(number);
 				}
 
@@ -249,10 +286,8 @@ public class Compiler {
 					load_symbol = Integer.parseInt(load.substring(1));
 				}
 				else if(Character.isLetter(load.charAt(0))) {
-					if(!variables.containsKey(load)) {
-						variables.put(load, data_pointer);
-						data_pointer--;
-					}
+					if(!variables.containsKey(load))
+						throw new UndefinedVariableException();
 
 					load_symbol = variables.get(load);
 				}
@@ -262,7 +297,7 @@ public class Compiler {
 					if(!constants.contains(number))
 						constants.add(number);
 
-					//This is a constant so marked it
+					//This is a constant so mark it
 					load_symbol = 10000 + constants.indexOf(number);
 				}
 
@@ -302,25 +337,37 @@ public class Compiler {
 
 	private LinkedList<String> convertToPostfix(String infix) {
 		LinkedList<String> postfix = new LinkedList<String>();
-		Stack<Character> processStack = new Stack<Character>();
+		Stack<Character> operator_stack = new Stack<Character>();
 		char[] chars = infix.toCharArray();
 		for(int i = 0; i < chars.length; i++) {
 			String term = new String();
-			while(operators.indexOf(chars[i]) == -1 || i == 0 || (i > 0 && operators.indexOf(chars[i - 1]) != -1 && operators.indexOf(chars[i]) == 1)) {
+
+			//Get full term
+			while(operators.indexOf(chars[i]) == -1 || i == 0 || (operators.indexOf(chars[i - 1]) != -1 && operators.indexOf(chars[i]) == 1)) {
 				term += chars[i];
 				i++;
+
+				if(i >= chars.length) {
+					postfix.add(term);
+					for(char operator : operator_stack)
+						postfix.add(Character.toString(operator));
+					return postfix;
+				}
 			}
+
 			postfix.add(term);
-			if(processStack.empty()) {
-				processStack.push(chars[i]);
+			if(operator_stack.empty()) {
+				operator_stack.push(chars[i]);
 			}
 			else {
-				while(operators.indexOf(chars[i]) <= operators.indexOf(processStack.peek())) {
-					postfix.add(Character.toString(processStack.pop()));
+				while(operators.indexOf(chars[i]) <= operators.indexOf(operator_stack.peek())) {
+					postfix.add(Character.toString(operator_stack.pop()));
 				}
-				processStack.push(chars[i]);
+
+				operator_stack.push(chars[i]);
 			}
 		}
+
 		return postfix;
 	}
 }
