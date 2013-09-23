@@ -24,11 +24,16 @@ public class Compiler {
 		scanner = new Scanner(file);
 		memory = new int[100];
 		constants = new ArrayList<Integer>();
+		line_number_list = new ArrayList<Integer>();
 		line_numbers = new HashMap<Integer, Integer>();
 		variables = new HashMap<String, Integer>();
 		last_line_number = 0;
 		pointer = 0;
 		data_pointer = 99;
+	}
+
+	public int getLineNumber() {
+		return last_line_number;
 	}
 
 	public int[] compile() throws OutOfMemoryException, IllegalArgumentException, InvalidVariableException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
@@ -91,7 +96,7 @@ public class Compiler {
 				if(!line_number_list.contains(goto_line))
 					line_number_list.add(goto_line);
 
-				memory[pointer] = 14000 + line_number.indexOf(goto_line);
+				memory[pointer] = 14000 + line_numbers.indexOf(goto_line);
 			}
 			//Yay for if's
 			else if(command[1].equalsIgnoreCase("if")) {
