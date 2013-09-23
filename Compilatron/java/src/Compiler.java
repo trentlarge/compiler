@@ -30,7 +30,7 @@ public class Compiler {
 		data_pointer = 99;
 	}
 
-	public int[] compile() throws OutOfMemoryException, LineNumberException, InvalidVariableException, UndefinedVaribleException, IllegalArgumentException {
+	public int[] compile() throws OutOfMemoryException, LineNumberException, InvalidVariableException, UndefinedVariableException, IllegalArgumentException, SyntaxException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
@@ -90,6 +90,8 @@ public class Compiler {
 
 			pointer++;
 		}
+		
+		return memory;
 	}
 
 	private void parseRelation(String relation, int goto_symbol) throws SyntaxException {
@@ -156,23 +158,23 @@ public class Compiler {
 
 		int temp_data_pointer = data_pointer;
 		for(int i = 0; i < postfix.size(); i++) {
-			int operator = operators.indexOf(postfix[i].charAt(0));
+			int operator = operators.indexOf(postfix.get(i).charAt(0));
 			if(operator != -1) {
 				if(temp_data_pointer < pointer) {
 					//You dun goofed!
 				}
 
 				int operand;
-				if(Character.isLetter(postfix[i - 1].charAt(0))) {
-					if(!variables.containsKey(postfix[i - 1])) {
-						variables.put(postfix[i - 1], data_pointer);
+				if(Character.isLetter(postfix.get(i - 1).charAt(0))) {
+					if(!variables.containsKey(postfix.get(i - 1))) {
+						variables.put(postfix.get(i - 1), data_pointer);
 						data_pointer--;
 					}
 
-					operand = variables.get(postfix[i - 1]);
+					operand = variables.get(postfix.get(i - 1));
 				}
 				else {
-					int number = Integer.parseInt(postfix[i - 1]);
+					int number = Integer.parseInt(postfix.get(i - 1));
 
 					if(!constants.contains(number))
 						constants.add(number);
@@ -181,20 +183,20 @@ public class Compiler {
 				}
 
 				int load;
-				if(operators.indexOf(postfix[i - 1].charAt(0)) != -1) {
-					operand = temp_data_pointer;
+				if(operators.indexOf(postfix.get(i - 1).charAt(0)) != -1) {
+					load = temp_data_pointer;
 					temp_data_pointer++;
 				}
-				else if(Character.isLetter(postfix[i - 2].charAt(0))) {
-					if(!variables.containsKey(postfix[i - 2])) {
-						variables.put(postfix[i - 2], data_pointer);
+				else if(Character.isLetter(postfix.get(i - 2).charAt(0))) {
+					if(!variables.containsKey(postfix.get(i - 2))) {
+						variables.put(postfix.get(i - 2), data_pointer);
 						data_pointer--;
 					}
 
-					load = variables.get(postfix[i - 2]);
+					load = variables.get(postfix.get(i - 2));
 				}
 				else {
-					int number = Integer.parseInt(postfix[i - 2]);
+					int number = Integer.parseInt(postfix.get(i - 2));
 
 					if(!constants.contains(number))
 						constants.add(number);
