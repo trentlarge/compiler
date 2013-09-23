@@ -8,12 +8,14 @@
  * 	input [variable]				- Grab an input value from the user and store in [variable]
  * 	print [variable]				- Print the contents of [variable]
  * 	if [relation] goto [line]		- Goto [line] if [relation] is true.  Relation must not contain spaces and valid relational operators include >,<,>=,<=,==,!= and have expressions on either side
- * 	let [variable]=[expression]		- Set [variable] to the result of [expression].  Expression must not contain spaces and valid expression operators include +,-,*,/
+ * 	let [variable]=[expression]		- Set [variable] to the result of [expression].  Expression must not contain spaces and valid expression operators include +,-,*,/.  Expressions can be a variable, a constant, or variables and constants separated by operators
  * 	goto [line]						- Goto [line]
  * 	end								- Halts the program
  * 
  * Statements are done in the form:
  * 	[line] [command] [args]
+ * 
+ * 	Number constants are stored at the end of the program and variables are stored at the end of the memory.
  *  
  * @author Foster Mclane and Jonathan Lowe
  */
