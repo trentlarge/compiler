@@ -37,7 +37,7 @@ public class Compiler {
 		return last_line_number;
 	}
 
-	public int[] compile() throws OutOfMemoryException, IllegalArgumentException, InvalidVariableException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
+	public int[] compile() throws OutOfMemoryException, IllegalArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
@@ -118,10 +118,9 @@ public class Compiler {
 			//You dun goofed
 		}
 
-		//Load the constants on the end of the program
+		//Space the constants on the end of the program
 		for(int i = 0; i < constants.size(); i++)
 			memory[pointer + i] = constants.get(i);
-
 
 		for(int i = 0; i < 100; i++) {
 			int opcode = memory[i] % 100;
@@ -132,17 +131,18 @@ public class Compiler {
 				case 132:
 				case 133:
 					//Take 1 off of the opcode then add the appropriate pointer to the constant
-					memory[i] = opcode - 100 + pointer + memory[i] / 100;
+					memory[i] = (opcode - 100) * 100 + pointer + memory[i] / 100;
 					break;
 				//Line numbers
 				case 140:
 				case 141:
 				case 142:
+					//Check that the line number exists
 					Integer line_number_pointer = line_numbers.get(line_number_list.get(memory[i] / 100));
 					if(line_number_pointer == null)
 						throw new GotoException();
 
-					memory[i] = opcode  - 100 + line_number_pointer;
+					memory[i] = (opcode  - 100) * 100 + line_number_pointer;
 					break;
 			}
 		}
@@ -150,7 +150,7 @@ public class Compiler {
 		return memory;
 	}
 
-	private void parseRelation(String relation, int goto_symbol) throws SyntaxException {
+	private void parseRelation(String relation, int goto_symbol) throws SyntaxException, NumberFormatException {
 		//Check relations based on regexes
 		Matcher matcher = relation_pattern.matcher(relation);
 		if(!matcher.matches())
@@ -213,67 +213,73 @@ public class Compiler {
 		ListIterator<String> postfix = convertToPostfix(expression).listIterator();
 
 		int temp_data_pointer = data_pointer;
-		for(int i = 0; i < postfix.size(); i++) {
-			int operator = operators.indexOf(postfix.get(i).charAt(0));
+		while(postfix.hasNext()) {
+			int operator = operators.indexOf(postfix.next().charAt(0));
 			if(operator != -1) {
 				if(temp_data_pointer < pointer) {
 					//You dun goofed!
 				}
 
-				int operand;
-				if(Character.isLetter(postfix.get(i - 1).charAt(0))) {
-					if(!variables.containsKey(postfix.get(i - 1))) {
-						variables.put(postfix.get(i - 1), data_pointer);
+				String operand = postfix.previous();
+				int operand_symbol;
+				if(operand.charAt(0) == '.') {
+					operand_symbol = Integer.parseInt(operand.substring(1));
+				}
+				else if(Character.isLetter(operand.charAt(0))) {
+					if(!variables.containsKey(operand)) {
+						variables.put(operand, data_pointer);
 						data_pointer--;
 					}
 
-					operand = variables.get(postfix.get(i - 1));
+					operand_symbol = variables.get(operand);
 				}
 				else {
-					int number = Integer.parseInt(postfix.get(i - 1));
+					int number = Integer.parseInt(operand);
 
 					if(!constants.contains(number))
 						constants.add(number);
 
-					operand = constants.indexOf(number);
+					//This is a constant so marked it
+					operand_symbol = 10000 + constants.indexOf(number);
 				}
 
-				int load;
-				if(operators.indexOf(postfix.get(i - 1).charAt(0)) != -1) {
-					load = temp_data_pointer;
-					temp_data_pointer++;
+				String load = postfix.previous();
+				int load_symbol;
+				if(load.charAt(0) == '.') {
+					load_symbol = Integer.parseInt(load.substring(1));
 				}
-				else if(Character.isLetter(postfix.get(i - 2).charAt(0))) {
-					if(!variables.containsKey(postfix.get(i - 2))) {
-						variables.put(postfix.get(i - 2), data_pointer);
+				else if(Character.isLetter(load.charAt(0))) {
+					if(!variables.containsKey(load)) {
+						variables.put(load, data_pointer);
 						data_pointer--;
 					}
 
-					load = variables.get(postfix.get(i - 2));
+					load_symbol = variables.get(load);
 				}
 				else {
-					int number = Integer.parseInt(postfix.get(i - 2));
+					int number = Integer.parseInt(load);
 
 					if(!constants.contains(number))
 						constants.add(number);
 
-					load = constants.indexOf(number);
+					//This is a constant so marked it
+					load_symbol = 10000 + constants.indexOf(number);
 				}
 
-				memory[pointer] = 2000 + load;
+				memory[pointer] = 2000 + load_symbol;
 				pointer++;
 				switch(operator) {
 					case 0:
-						memory[pointer] = 3000 + operand;
+						memory[pointer] = 3000 + operand_symbol;
 						break;
 					case 1:
-						memory[pointer] = 3100 + operand;
+						memory[pointer] = 3100 + operand_symbol;
 						break;
 					case 2:
-						memory[pointer] = 3200 + operand;
+						memory[pointer] = 3200 + operand_symbol;
 						break;
 					case 3:
-						memory[pointer] = 3300 + operand;
+						memory[pointer] = 3300 + operand_symbol;
 						break;
 					default:
 						//You dun goofed!
@@ -281,6 +287,14 @@ public class Compiler {
 				pointer++;
 				memory[pointer] = 2100 + temp_data_pointer;
 				pointer++;
+
+				postfix.remove();
+				postfix.next();
+				postfix.remove();
+				postfix.next();
+				postfix.remove();
+				postfix.add("." + temp_data_pointer);
+
 				temp_data_pointer--;
 			}
 		}

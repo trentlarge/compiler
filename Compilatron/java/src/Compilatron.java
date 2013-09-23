@@ -43,6 +43,10 @@ public class Compilatron {
 			Util.printError("Error: Poor naming choice at " + compiler.getLineNumber());
 			System.exit(4);
 		}
+		catch(NumberFormatException e) {
+			Util.printError("Error: Letters != Numbers at " + compiler.getLineNumber());
+			System.exit(4);
+		}
 		catch(SyntaxException e) {
 			Util.printError("Error: You dun goofed at " + compiler.getLineNumber());
 			System.exit(4);
