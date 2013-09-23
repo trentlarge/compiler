@@ -15,6 +15,7 @@ public class Compiler {
 	Scanner scanner;
 	int[] memory;
 	ArrayList<Integer> constants;
+	ArrayList<Integer> line_number_list;
 	HashMap<Integer, Integer> line_numbers;
 	HashMap<String, Integer> variables;
 	int last_line_number, pointer, data_pointer;
@@ -30,23 +31,29 @@ public class Compiler {
 		data_pointer = 99;
 	}
 
-	public int[] compile() throws OutOfMemoryException, LineNumberException, InvalidVariableException, UndefinedVariableException, IllegalArgumentException, SyntaxException {
+	public int[] compile() throws OutOfMemoryException, IllegalArgumentException, InvalidVariableException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
 
 			String[] command = scanner.nextLine().split(" "); //Everything is separated by spaces
 
-			//Double check line numbers and save each one as a symbol
+			//Double check line numbers
 			int line_number = Integer.parseInt(command[0]);
 			if(line_number <= last_line_number)
 				throw new LineNumberException();
+
+			//Add it to the hashmap and line number array
+			if(!line_number_list.contains(line_number))
+				line_number_list.add(line_number);
 			line_numbers.put(line_number, pointer);
 			last_line_number = line_number;
 
-			if(command[1].equalsIgnoreCase("rem")) //Ignore comment lines
+			//Ignore comment lines
+			if(command[1].equalsIgnoreCase("rem"))
 				continue;
-			else if(command[1].equalsIgnoreCase("input")) { //Make a new variable and remember it
+			//Make a new variable and remember it
+			else if(command[1].equalsIgnoreCase("input")) {
 				if(!Character.isLetter(command[2].charAt(0)))
 					throw new InvalidVariableException();
 
@@ -54,13 +61,15 @@ public class Compiler {
 				memory[pointer] = 1000 + data_pointer;
 				data_pointer--;
 			}
-			else if(command[1].equalsIgnoreCase("print")) { //Simply print variable
+			//Simply print variable
+			else if(command[1].equalsIgnoreCase("print")) {
 				if(!variables.containsKey(command[2]))
 					throw new UndefinedVariableException();
 
 				memory[pointer] = 1100 + variables.get(command[2]);
 			}
-			else if(command[1].equalsIgnoreCase("let")) { //If a variable doesn't exist, create it then parse the expression
+			//If a variable doesn't exist, create it then parse the expression
+			else if(command[1].equalsIgnoreCase("let")) {
 				String[] params = command[2].split("=", 1);
 
 				if(params.length < 2)
@@ -76,19 +85,59 @@ public class Compiler {
 
 				parseExpression(params[1], variables.get(params[0]));
 			}
-			else if(command[1].equalsIgnoreCase("goto")) { //Put a new goto
-				memory[pointer] = 4000 + Integer.parseInt(command[2]);
+			//Put a new goto
+			else if(command[1].equalsIgnoreCase("goto")) {
+				int goto_line = Integer.parseInt(command[2]);
+				if(!line_number_list.contains(goto_line))
+					line_number_list.add(goto_line);
+
+				memory[pointer] = 14000 + line_number.indexOf(goto_line);
 			}
-			else if(command[1].equalsIgnoreCase("if")) { //Yay for if's
+			//Yay for if's
+			else if(command[1].equalsIgnoreCase("if")) {
 				if(!command[3].equalsIgnoreCase("goto"))
 					throw new IllegalArgumentException();
 
 				parseRelation(command[2], Integer.parseInt(command[4])); //Call parse relation
 			}
-			else if(command[1].equalsIgnoreCase("end")) //Put a halt
+			//Put a halt
+			else if(command[1].equalsIgnoreCase("end"))
 				memory[pointer] = 4300;
 
 			pointer++;
+		}
+
+		//Make sure we still have room for constants
+		if(pointer + constants.size() > data_pointer) {
+			//You dun goofed
+		}
+
+		//Load the constants on the end of the program
+		for(int i = 0; i < constants.size(); i++)
+			memory[pointer + i] = constants.get(i);
+
+
+		for(int i = 0; i < 100; i++) {
+			switch(int opcode = memory[i] % 100) {
+				//Constants
+				case 130:
+				case 131:
+				case 132:
+				case 133:
+					//Take 1 off of the opcode then add the appropriate pointer to the constant
+					memory[i] = opcode - 100 + pointer + memory[i] / 100;
+					break;
+				//Line numbers
+				case 140:
+				case 141:
+				case 142:
+					Integer line_number_pointer = line_numbers.get(line_number.get(memory[i] / 100));
+					if(line_number_pointer == null)
+						throw new GotoException();
+
+					memory[i] = opcode  - 100 + line_number_pointer;
+					break;
+			}
 		}
 		
 		return memory;
@@ -110,7 +159,7 @@ public class Compiler {
 		if(matcher.group(2).charAt(0) == '>') {
 			memory[pointer] = 3100 + data_pointer + 1; //First number
 			pointer++;
-			memory[pointer] = 4200 + goto_symbol; //Branch negative to "goto"
+			memory[pointer] = 14200 + goto_symbol; //Branch negative to "goto"
 			if(matcher.group(2).charAt(1) == '=') {
 				pointer++;
 				memory[pointer] = 4100 + goto_symbol; //Also branch zero if equal to
@@ -120,16 +169,16 @@ public class Compiler {
 			memory[pointer - 1] = 2000 + data_pointer + 1;
 			memory[pointer] = 3100 + data_pointer;
 			pointer++;
-			memory[pointer] = 4200 + goto_symbol;
+			memory[pointer] = 14200 + goto_symbol;
 			if(matcher.group(2).charAt(1) == '=') {
 				pointer++;
-				memory[pointer] = 4100 + goto_symbol;
+				memory[pointer] = 14100 + goto_symbol;
 			}
 		}
 		else if(matcher.group(2).equals("==")) {
 			memory[pointer] = 3100 + data_pointer + 1;
 			pointer++;
-			memory[pointer] = 4100 + goto_symbol;
+			memory[pointer] = 14100 + goto_symbol;
 		}
 		else if(matcher.group(2).equals("!=")) {
 			if(!constants.contains(-1))
@@ -137,11 +186,11 @@ public class Compiler {
 
 			memory[pointer] = 3100 + data_pointer + 1;
 			pointer++;
-			memory[pointer] = 4200 + goto_symbol;
+			memory[pointer] = 14200 + goto_symbol;
 			pointer++;
-			memory[pointer] = 3300 + constants.indexOf(-1);
+			memory[pointer] = 13300 + constants.indexOf(-1);
 			pointer++;
-			memory[pointer] = 4200 + goto_symbol;
+			memory[pointer] = 14200 + goto_symbol;
 		}
 
 		pointer++;
