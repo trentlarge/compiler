@@ -210,7 +210,7 @@ public class Compiler {
 		if(!matcher.matches())
 			throw new SyntaxException();
 
-		LinkedList<String> postfix = convertToPostfix(expression);
+		ListIterator<String> postfix = convertToPostfix(expression).listIterator();
 
 		int temp_data_pointer = data_pointer;
 		for(int i = 0; i < postfix.size(); i++) {
