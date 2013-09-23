@@ -1,1 +1,1 @@
-public class OutOfMemoryException extends Exception {}
+public class GotoException extends Exception {}

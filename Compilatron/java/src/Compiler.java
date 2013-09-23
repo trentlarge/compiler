@@ -96,7 +96,7 @@ public class Compiler {
 				if(!line_number_list.contains(goto_line))
 					line_number_list.add(goto_line);
 
-				memory[pointer] = 14000 + line_numbers.indexOf(goto_line);
+				memory[pointer] = 14000 + line_number_list.indexOf(goto_line);
 			}
 			//Yay for if's
 			else if(command[1].equalsIgnoreCase("if")) {
@@ -123,7 +123,8 @@ public class Compiler {
 
 
 		for(int i = 0; i < 100; i++) {
-			switch(int opcode = memory[i] % 100) {
+			int opcode = memory[i] % 100;
+			switch(opcode) {
 				//Constants
 				case 130:
 				case 131:
@@ -136,7 +137,7 @@ public class Compiler {
 				case 140:
 				case 141:
 				case 142:
-					Integer line_number_pointer = line_numbers.get(line_number.get(memory[i] / 100));
+					Integer line_number_pointer = line_numbers.get(line_number_list.get(memory[i] / 100));
 					if(line_number_pointer == null)
 						throw new GotoException();
 
