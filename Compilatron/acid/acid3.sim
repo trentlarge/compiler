@@ -1,0 +1,4 @@
+10 input x
+20 let x = -50 * x
+30 print x
+40 end

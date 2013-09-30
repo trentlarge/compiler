@@ -1,0 +1,5 @@
+10 input x
+20 input y
+30 let x = y + 5 * x
+40 print x
+50 end
