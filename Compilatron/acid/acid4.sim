@@ -1,9 +1,9 @@
 10 input x
 20 input y
 25 input k
-30 let z = 1
-40 let z = z * x
-50 let y = y – k
-60 if y > k goto 40
+30 let z=1
+40 let z=z*x
+50 let y=y-k
+60 if y>k goto 40
 70 print x
 80 end

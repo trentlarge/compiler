@@ -220,7 +220,7 @@ public class Compiler {
 			memory[pointer] = 3100 + data_pointer + 1; //First number
 			pointer++;
 			memory[pointer] = 14100 + goto_symbol; //Branch negative to "goto"
-			if(matcher.group(2).charAt(1) == '=') {
+			if(matcher.group(2).length() > 1 && matcher.group(2).charAt(1) == '=') {
 				pointer++;
 				memory[pointer] = 4100 + goto_symbol; //Also branch zero if equal to
 			}
@@ -230,7 +230,7 @@ public class Compiler {
 			memory[pointer] = 3100 + data_pointer;
 			pointer++;
 			memory[pointer] = 14100 + goto_symbol;
-			if(matcher.group(2).charAt(1) == '=') {
+			if(matcher.group(2).length() > 1 && matcher.group(2).charAt(1) == '=') {
 				pointer++;
 				memory[pointer] = 14100 + goto_symbol;
 			}
@@ -296,7 +296,7 @@ public class Compiler {
 
 		int temp_data_pointer = data_pointer;
 		while(postfix.hasNext()) {
-			int operator = operators.indexOf(postfix.next().charAt(0));
+			int operator = operators.indexOf(postfix.next());
 			if(operator != -1) {
 				if(temp_data_pointer < pointer)
 					throw new OutOfMemoryException();
@@ -355,10 +355,10 @@ public class Compiler {
 						memory[pointer] = 3100 + operand_symbol;
 						break;
 					case 2:
-						memory[pointer] = 3200 + operand_symbol;
+						memory[pointer] = 3300 + operand_symbol;
 						break;
 					case 3:
-						memory[pointer] = 3300 + operand_symbol;
+						memory[pointer] = 3200 + operand_symbol;
 						break;
 				}
 				pointer++;
@@ -394,8 +394,8 @@ public class Compiler {
 
 				if(i >= chars.length) {
 					postfix.add(term);
-					for(char operator : operator_stack)
-						postfix.add(Character.toString(operator));
+					while(!operator_stack.empty())
+						postfix.add(Character.toString(operator_stack.pop()));
 					return postfix;
 				}
 			}

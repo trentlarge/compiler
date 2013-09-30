@@ -1,6 +1,6 @@
 10 input x
-20 let y = 4
-30 if x > y goto 70
+20 let y=4
+30 if x>y goto 70
 40 print x
 50 input x
 60 goto 10
