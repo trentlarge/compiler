@@ -166,7 +166,7 @@ public class Compiler {
 		if(pointer + constants.size() > data_pointer)
 			throw new OutOfMemoryException();
 
-		//Space the constants on the end of the program
+		//Add the constants to the end of the program
 		for(int i = 0; i < constants.size(); i++)
 			memory[pointer + i] = constants.get(i);
 
@@ -184,7 +184,7 @@ public class Compiler {
 					//Equivalent to (opcode - 100) * 100 + pointer + memory[i] % 100
 					memory[i] = memory[i] - 10000 + pointer;
 					break;
-					//Line numbers
+				//Line numbers
 				case 140:
 				case 141:
 				case 142:
