@@ -77,8 +77,9 @@ public class Compiler {
 	 * @throws GotoException Goto nonexistent line
 	 * @throws LineNumberException Line numbers don't increase
 	 * @throws UndefinedVariableException Variable accessed before it exists
+	 * @throws NoHaltException No end found in code
 	 */
-	public int[] compile() throws OutOfMemoryException, ArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
+	public int[] compile() throws OutOfMemoryException, ArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException, NoHaltException {
 		boolean end = false;
 
 		while(scanner.hasNextLine()) {
@@ -352,8 +353,15 @@ public class Compiler {
 					load_symbol = 10000 + constants.indexOf(number);
 				}
 
-				memory[pointer] = 2000 + load_symbol;
-				pointer++;
+				if(memory[pointer - 1] % 100 == load_symbol) {
+					pointer--;
+					memory[pointer] = 0;
+				}
+				else {
+					memory[pointer] = 2000 + load_symbol;
+					pointer++;
+				}
+
 				switch(operator) {
 					case 0:
 						memory[pointer] = 3000 + operand_symbol;
