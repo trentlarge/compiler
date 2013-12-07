@@ -79,6 +79,8 @@ public class Compiler {
 	 * @throws UndefinedVariableException Variable accessed before it exists
 	 */
 	public int[] compile() throws OutOfMemoryException, ArgumentException, InvalidVariableException, NumberFormatException, SyntaxException, GotoException, LineNumberException, UndefinedVariableException {
+		boolean end = false;
+
 		while(scanner.hasNextLine()) {
 			if(pointer >= data_pointer)
 				throw new OutOfMemoryException();
@@ -157,10 +159,15 @@ public class Compiler {
 			}
 			//Put a halt
 			else if(command[1].equalsIgnoreCase("end")) {
+				end = true;
 				memory[pointer] = 4300;
 				pointer++;
 			}
 		}
+
+		//Make sure the program ends at some point
+		if(!end)
+			throw new NoHaltException();
 
 		//Make sure we still have room for constants
 		if(pointer + constants.size() > data_pointer)

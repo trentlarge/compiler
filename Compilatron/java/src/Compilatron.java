@@ -88,6 +88,10 @@ public class Compilatron {
 			Util.printError("Error: Identity crisis at " + compiler.getLineNumber());
 			System.exit(5);
 		}
+		catch(NoHaltException e) {
+			Util.printError("Error: You just don't end do you?");
+			System.exit(5);
+		}
 
 		PrintWriter output = null;
 		try {
