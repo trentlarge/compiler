@@ -103,11 +103,14 @@ public class Compilatron {
 			System.exit(1);
 		}
 
-		for(int i = 0; i <= compiler.getPointer() / 10; i++) {
-			output.print(memory[i * 10]);
-			for(int ii = 1; ii < 10; ii++)
-				output.print(" " + memory[i * 10 + ii]);
-			output.println();
+		for(int i = 0; i <= compiler.getPointer(); i++) {
+			if(i % 10 == 0) {
+				output.println();
+				output.print(memory[i]);
+			}
+			else {
+				output.print(" " + memory[i]);
+			}
 		}
 		output.close();
 	}
