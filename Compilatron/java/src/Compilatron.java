@@ -35,7 +35,9 @@ public class Compilatron {
 
 		File file = null;
 		try {
-			chooser.showOpenDialog(null);
+			int result = chooser.showOpenDialog(null);
+			if(result != JFileChooser.APPROVE_OPTION) //If user didn't select a file
+				return;
 			file = chooser.getSelectedFile();
 		}
 		catch(Exception e) {
