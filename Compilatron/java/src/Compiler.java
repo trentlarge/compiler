@@ -201,7 +201,7 @@ public class Compiler {
 					if(line_number_pointer == null)
 						throw new GotoException();
 
-					memory[i] = (opcode  - 100) * 100 + line_number_pointer;
+					memory[i] = (opcode - 100) * 100 + line_number_pointer;
 					break;
 			}
 		}

@@ -32,7 +32,7 @@ int main(int argc, char * argv[]) {
 	int accumulator = 0;
 
 	char option[20];
-	int result = fscanf(program, "#%[^\n]\n", option);
+	int result = fscanf(program, "#%20[^\n]\n", option);
 	while(result > 0 && result != EOF) {
 		if(sscanf(option, "memory %hd", &mem_length) == 1);
 		else if(!warnings && sscanf(option, "warnings %1hd", &warnings) == 1);
@@ -41,7 +41,7 @@ int main(int argc, char * argv[]) {
 			return 5;
 		}
 
-		result = fscanf(program, "#%20s\n", option);
+		result = fscanf(program, "#%20[^\n]\n", option);
 	}
 
 	if(mem_length < 0 || mem_length > 32767) {
