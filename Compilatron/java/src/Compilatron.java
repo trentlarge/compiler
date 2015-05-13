@@ -105,7 +105,8 @@ public class Compilatron {
 			System.exit(1);
 		}
 
-		for(int i = 0; i <= compiler.getPointer(); i++) {
+		output.print(memory[0]);
+		for(int i = 1; i <= compiler.getPointer(); i++) {
 			if(i % 10 == 0) {
 				output.println();
 				output.print(memory[i]);
